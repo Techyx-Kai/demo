@@ -1,0 +1,13 @@
+src
+└── main
+    ├── java
+    │   └── com.company.project
+    │       ├── config
+    │       ├── controller
+    │       ├── service
+    │       ├── client
+    │       ├── dto
+    │       ├── exception
+    │       ├── util
+    │       ├── constant
+    │       └── model
