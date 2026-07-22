@@ -1,13 +1,394 @@
-src
-└── main
-    ├── java
-    │   └── com.company.project
-    │       ├── config
-    │       ├── controller
-    │       ├── service
-    │       ├── client
-    │       ├── dto
-    │       ├── exception
-    │       ├── util
-    │       ├── constant
-    │       └── model
+# Enterprise Security Audit Logging Framework
+
+## Objective
+
+Design and implement an enterprise-grade **Security Audit Logging Framework** for a Spring Boot 3 application using **Java 21**.
+
+The framework is intended for **security auditing and compliance** and shall integrate with the organization's existing EFK logging standard.
+
+The framework shall audit **user business actions** at the Controller layer only.
+
+It shall answer the following audit questions:
+
+- Who performed the action?
+- What action was performed?
+- Which business object was affected?
+- Which business record was affected?
+- From which IP address?
+- Was the operation successful or failed?
+
+This framework is **not** intended for application debugging.
+
+---
+
+# Technology Stack
+
+- Java 21
+- Spring Boot 3.x
+- Spring MVC
+- HandlerInterceptor
+- SLF4J
+- Logback
+- Jackson
+- MDC (Mapped Diagnostic Context)
+
+Do **NOT** use Lombok.
+
+Use explicit constructors, getters, setters and standard Java classes.
+
+---
+
+# Existing Enterprise Logging Standard
+
+The application already follows the enterprise EFK Logback pattern.
+
+**The implementation MUST NOT modify the existing logging pattern.**
+
+Instead, populate the required MDC fields.
+
+Current Logback Pattern:
+
+```text
+[%d{yyyy-MM-dd'T'HH:mm:ss.SSS+08:00}]
+[%p]
+[%-50c]
+[%X{traceId}]
+[%X{contextId}]
+[APM000119]
+[%X{bizFunc}]
+[%X{messageType}]
+[1.0.0.0]
+[%-20t]
+[%X{bizKeys}]
+[%m]
+```
+
+---
+
+# Scope
+
+The Security Audit Framework shall only audit Controller requests.
+
+It shall NOT audit:
+
+- Service
+- DAO / Repository
+- SQL
+- External REST calls
+- Internal application execution
+
+The objective is to capture the **user's business action**, not technical implementation.
+
+---
+
+# Security Audit Lifecycle
+
+Each Controller request shall generate exactly **two audit logs**.
+
+## Entry Audit
+
+Generated immediately before the Controller method executes.
+
+Log message:
+
+```text
+Enter <methodName>()
+```
+
+Example
+
+```text
+Enter approveClaim()
+```
+
+---
+
+## Exit Audit
+
+Generated immediately after Controller execution.
+
+Success
+
+```text
+Exit <methodName>()
+```
+
+Example
+
+```text
+Exit approveClaim()
+```
+
+Failure
+
+```text
+Exit <methodName>() - FAILED
+```
+
+Example
+
+```text
+Exit approveClaim() - FAILED
+```
+
+The framework shall generate these messages automatically.
+
+Developers must never manually construct audit log messages.
+
+---
+
+# MDC Fields
+
+The framework shall populate the following MDC values.
+
+## traceId
+
+Existing request Trace ID.
+
+---
+
+## contextId
+
+Existing request Context ID.
+
+---
+
+## messageType
+
+Always
+
+```text
+Security
+```
+
+---
+
+## bizFunc
+
+Represents the audited business function.
+
+Examples
+
+- LOGIN
+- LOGOUT
+- SEARCH_CUSTOMER
+- CREATE_CUSTOMER
+- UPDATE_CUSTOMER
+- DELETE_CUSTOMER
+- APPROVE_CLAIM
+- REJECT_CLAIM
+- DOWNLOAD_REPORT
+
+The business function shall not be hardcoded inside the interceptor.
+
+The framework should support a custom annotation.
+
+Example
+
+```java
+@SecurityAudit(
+    action = "APPROVE_CLAIM",
+    businessObject = "Claim"
+)
+```
+
+---
+
+## bizKeys
+
+`bizKeys` shall contain a **single JSON string** describing the audited business context.
+
+The JSON schema shall remain consistent across all applications.
+
+It shall contain business information only.
+
+Example
+
+```json
+{
+  "userId": "KAI001",
+  "clientIp": "10.10.10.10",
+  "businessObject": "Claim",
+  "businessId": "CLM123456",
+  "action": "APPROVE_CLAIM"
+}
+```
+
+Successful exit
+
+```json
+{
+  "userId": "KAI001",
+  "clientIp": "10.10.10.10",
+  "businessObject": "Claim",
+  "businessId": "CLM123456",
+  "action": "APPROVE_CLAIM",
+  "result": "SUCCESS"
+}
+```
+
+Failed exit
+
+```json
+{
+  "userId": "KAI001",
+  "clientIp": "10.10.10.10",
+  "businessObject": "Claim",
+  "businessId": "CLM123456",
+  "action": "APPROVE_CLAIM",
+  "result": "FAILED",
+  "errorCode": "CLAIM_001",
+  "errorMessage": "Validation failed"
+}
+```
+
+---
+
+# bizKeys Rules
+
+The `bizKeys` JSON shall contain only business-related audit information.
+
+It shall NOT contain technical logging information.
+
+Do NOT include:
+
+- event
+- ENTER
+- EXIT
+- duration
+- traceId
+- contextId
+- thread name
+- log level
+- logger name
+
+Those values are already provided by the enterprise logging pattern.
+
+The ENTER and EXIT audit logs shall use the **same JSON schema**.
+
+Fields that are not applicable shall simply be omitted instead of changing the schema.
+
+---
+
+# PII Protection
+
+The framework shall prevent sensitive information from being written into audit logs.
+
+Sensitive fields shall be masked or excluded.
+
+Examples
+
+- password
+- confirmPassword
+- authorization
+- bearer token
+- JWT
+- OAuth token
+- sessionId
+- cookie
+- email
+- phone number
+- identification number
+- date of birth
+- address
+- bank account number
+- credit card number
+
+Support configurable masking rules.
+
+---
+
+# Request Parameter Policy
+
+Do not serialize the entire request.
+
+Do not log every request parameter.
+
+Only approved business identifiers shall be logged.
+
+Examples
+
+- customerId
+- policyNo
+- claimNo
+- transactionId
+
+Use an allowlist approach.
+
+---
+
+# MDC Lifecycle
+
+Populate MDC before Controller execution.
+
+Clear MDC after request completion.
+
+Controllers shall not manually populate MDC.
+
+---
+
+# Performance Requirements
+
+The framework shall
+
+- Minimize object creation.
+- Avoid unnecessary reflection.
+- Avoid logging request bodies.
+- Avoid repeated JSON serialization.
+- Support high concurrency.
+- Minimize request latency.
+
+---
+
+# Design Principles
+
+Follow
+
+- SOLID
+- Single Responsibility Principle
+- Separation of Concerns
+- Open/Closed Principle
+
+The interceptor shall only orchestrate auditing.
+
+Business data extraction, masking, JSON serialization and logging shall be delegated to dedicated components.
+
+---
+
+# Deliverables
+
+Generate the following:
+
+1. Package structure.
+2. Architecture diagram.
+3. Sequence diagram.
+4. `@SecurityAudit` annotation.
+5. `SecurityAuditInterceptor`.
+6. `SecurityAuditLogger`.
+7. `SecurityAuditEvent`.
+8. `BusinessKeyExtractor`.
+9. `PiiMaskingService`.
+10. `JsonAuditSerializer`.
+11. `MdcUtil`.
+12. `SecurityAuditProperties`.
+13. `WebMvcConfigurer`.
+14. `logback-spring.xml`.
+15. `application.yml`.
+16. Sample ENTER audit log.
+17. Sample EXIT SUCCESS audit log.
+18. Sample EXIT FAILED audit log.
+19. Unit tests.
+20. Integration tests.
+
+---
+
+# Expected Outcome
+
+The resulting framework shall
+
+- integrate seamlessly with the existing enterprise EFK logging format;
+- produce consistent, searchable Security Audit logs;
+- keep Controller implementations clean and declarative;
+- require only a `@SecurityAudit` annotation on audited endpoints;
+- centralize all audit logging logic within the framework;
+- be extensible so additional audit fields can be introduced without modifying Controller implementations.
