@@ -1,0 +1,165 @@
+# Standardize Numeric Format Patterns
+
+You are a senior Java engineer responsible for enforcing the project's coding standards.
+
+## Objective
+
+Standardize all numeric format pattern string literals to use `NumericFormatConstants`.
+
+This is a project-wide coding standard refactoring and is not limited to SonarQube duplicate literal issues.
+
+---
+
+## Coding Standard
+
+All numeric formatting patterns must reference `NumericFormatConstants` instead of hardcoded string literals.
+
+Examples include patterns used by:
+
+- DecimalFormat
+- DecimalFormatSymbols
+- NumberFormat
+- Formatter
+- Currency formatting
+- Percentage formatting
+- BigDecimal display formatting
+- Custom numeric formatting utilities
+
+---
+
+## Examples
+
+### Before
+
+```java
+new DecimalFormat("#,##0.00;-#,##0.00");
+```
+
+### After
+
+```java
+new DecimalFormat(NumericFormatConstants.DECIMAL_2_PLACES);
+```
+
+---
+
+### Before
+
+```java
+"#,##0"
+```
+
+### After
+
+```java
+NumericFormatConstants.INTEGER_GROUPING
+```
+
+---
+
+### Before
+
+```java
+"0.00%"
+```
+
+### After
+
+```java
+NumericFormatConstants.PERCENTAGE_2_PLACES
+```
+
+---
+
+## Rules
+
+### Replace ALL Numeric Format Literals
+
+Do not limit replacements to duplicated literals reported by SonarQube.
+
+Replace every numeric format pattern with the corresponding constant.
+
+---
+
+### Reuse Existing Constants
+
+Before creating a new constant:
+
+- Search `NumericFormatConstants`.
+- Reuse existing constants whenever possible.
+
+Do not introduce duplicate constants.
+
+---
+
+### Add Missing Constants
+
+If a numeric format pattern does not exist:
+
+- Add it to `NumericFormatConstants`.
+- Follow the project's existing naming conventions.
+- Do not create additional constants classes.
+
+---
+
+### Scope
+
+Apply to:
+
+- DecimalFormat
+- NumberFormat
+- Formatter
+- Currency formatting
+- Percentage formatting
+- Numeric utility classes
+- Controllers
+- Services
+- DAOs
+- JSPs
+- Unit tests (unless the format pattern itself is the subject of the test)
+
+---
+
+### Preserve Behavior
+
+Do not change:
+
+- Numeric precision
+- Rounding
+- Locale behavior
+- Formatting rules
+- Business logic
+- Performance
+
+Only replace hardcoded numeric format strings.
+
+---
+
+### Minimize Changes
+
+Only modify code required to standardize numeric format patterns.
+
+Do not perform unrelated refactoring.
+
+---
+
+## Output
+
+Provide:
+
+1. Modified code.
+2. New constants added to `NumericFormatConstants` (if any).
+3. Existing constants reused.
+4. Confirmation that:
+   - formatting behavior is unchanged
+   - locale behavior is unchanged
+   - only numeric format literals were standardized
+   - no business logic was modified
+
+---
+
+# Golden Rule
+
+`NumericFormatConstants` is the single source of truth for all numeric format patterns.
+
+Replace every hardcoded numeric format pattern with the corresponding constant, regardless of whether it is duplicated.
