@@ -1,0 +1,299 @@
+# Standardize Endpoint URL Constants
+
+You are a senior Java web engineer responsible for enforcing the project's coding standards.
+
+## Objective
+
+Standardize all HTTP endpoint URL literals by replacing hardcoded endpoint paths with centralized compile-time constants.
+
+This is a **project-wide architecture refactoring**, not just a SonarQube duplicate literal fix.
+
+The generated code must remain **100% functionally equivalent**.
+
+---
+
+# Java Constraint
+
+HTTP mapping annotations require **compile-time constants**.
+
+Therefore:
+
+- **Do NOT use enums** for endpoint paths.
+- **Do NOT call methods inside annotations.**
+- Use a dedicated constants class containing `public static final String` values.
+
+Example (INVALID)
+
+```java
+@GetMapping(EndpointPath.LOGIN.getPath())
+```
+
+Example (VALID)
+
+```java
+@GetMapping(EndpointPaths.LOGIN)
+```
+
+---
+
+# Single Responsibility Principle
+
+Create a dedicated class
+
+```
+constants/web/EndpointPaths
+```
+
+(or the project's equivalent package)
+
+This class is the **single source of truth** for all application endpoint URLs.
+
+Do **not** place endpoint constants into unrelated constants classes.
+
+---
+
+# EndpointPaths Structure
+
+Example
+
+```java
+public final class EndpointPaths {
+
+    private EndpointPaths() {}
+
+    public static final String LOGIN = "/login";
+    public static final String LOGIN_DO = "/login.do";
+
+    public static final String IMPORT_EXPORT = "/importExport";
+    public static final String IMPORT_EXPORT_DO = "/importExport.do";
+
+    public static final String HEALTH_PING_SHORT = "/health/ping/short";
+    public static final String HEALTH_PING_LONG = "/health/ping/long";
+}
+```
+
+---
+
+# Scope
+
+Replace hardcoded endpoint URLs used in:
+
+- `@RequestMapping`
+- `@GetMapping`
+- `@PostMapping`
+- `@PutMapping`
+- `@DeleteMapping`
+- `@PatchMapping`
+- `@Controller`
+- `@RestController`
+- Spring Security
+- `requestMatchers()`
+- `ignoringRequestMatchers()`
+- Redirects
+- Forwards
+- `ModelAndView`
+- URL comparisons
+- Servlet mappings
+- Filters
+- Interceptors
+- Utility classes
+- Tests
+
+Replace all reusable endpoint path literals.
+
+Do **not** limit replacements to duplicated literals reported by SonarQube.
+
+---
+
+# Mapping Annotations
+
+Replace
+
+Before
+
+```java
+@GetMapping("/login")
+```
+
+After
+
+```java
+@GetMapping(EndpointPaths.LOGIN)
+```
+
+---
+
+Before
+
+```java
+@PostMapping("/importExport")
+```
+
+After
+
+```java
+@PostMapping(EndpointPaths.IMPORT_EXPORT)
+```
+
+---
+
+# Spring Security
+
+Replace
+
+Before
+
+```java
+.ignoringRequestMatchers(
+    "/login",
+    "/login.do",
+    "/importExport",
+    "/importExport.do"
+)
+```
+
+After
+
+```java
+.ignoringRequestMatchers(
+    EndpointPaths.LOGIN,
+    EndpointPaths.LOGIN_DO,
+    EndpointPaths.IMPORT_EXPORT,
+    EndpointPaths.IMPORT_EXPORT_DO
+)
+```
+
+---
+
+# Redirects
+
+Replace
+
+Before
+
+```java
+return "redirect:/login";
+```
+
+After
+
+```java
+return "redirect:" + EndpointPaths.LOGIN;
+```
+
+---
+
+# Forwarding
+
+Replace
+
+Before
+
+```java
+request.getRequestDispatcher("/login");
+```
+
+After
+
+```java
+request.getRequestDispatcher(EndpointPaths.LOGIN);
+```
+
+---
+
+# Search Before Creating
+
+Before adding a new endpoint constant:
+
+1. Search `EndpointPaths`.
+2. Reuse existing constants whenever possible.
+3. Only add missing endpoint paths.
+
+Never duplicate endpoint constants.
+
+---
+
+# Naming Convention
+
+Use uppercase snake case.
+
+Examples
+
+```java
+LOGIN
+LOGIN_DO
+IMPORT_EXPORT
+IMPORT_EXPORT_DO
+HEALTH_PING_SHORT
+HEALTH_PING_LONG
+USER_SEARCH
+USER_SAVE
+ACCOUNT_LIST
+ACCOUNT_DETAIL
+```
+
+---
+
+# Preserve Behaviour
+
+Do not change
+
+- URL mappings
+- Controller behaviour
+- Request routing
+- Spring Security rules
+- Redirects
+- Forwards
+- API contracts
+- Request methods (GET/POST/etc.)
+- Business logic
+
+Only replace hardcoded endpoint URL literals.
+
+---
+
+# Validation
+
+Verify
+
+- No remaining hardcoded endpoint URLs where reusable constants apply.
+- All mapping annotations use `EndpointPaths`.
+- All Spring Security request matchers use `EndpointPaths`.
+- All redirects and forwards use `EndpointPaths`.
+- Existing constants were reused whenever possible.
+- No duplicate endpoint constants were introduced.
+- Routing behaviour remains identical.
+- API URLs remain unchanged.
+
+---
+
+# Output Requirements
+
+Provide:
+
+1. Files modified.
+2. Existing endpoint constants reused.
+3. New endpoint constants added.
+4. Mapping annotations updated.
+5. Spring Security configuration updated.
+6. Redirects and forwards updated.
+7. Unused imports removed.
+8. Confirmation that:
+
+- functionality is unchanged
+- routing is unchanged
+- endpoint URLs are unchanged
+- only endpoint URL standardization was performed
+
+---
+
+# Golden Rules
+
+1. `EndpointPaths` is the single source of truth for application endpoint URLs.
+2. Use `public static final String` constants because annotation values must be compile-time constants.
+3. Do **not** use enums for endpoint mappings.
+4. Replace **all** reusable endpoint URL literals, not only SonarQube duplicate literals.
+5. Reuse existing constants before creating new ones.
+6. Do not create generic constants classes.
+7. Preserve 100% functional equivalence.
+8. Keep changes minimal and follow the project's existing architecture and coding standards.
