@@ -1,0 +1,212 @@
+# Refactor Screen Name Handling Using Spring Annotation
+
+## Goal
+
+Refactor the Spring MVC application to eliminate duplicated code that sets the page/screen title, such as:
+
+```java
+session.setAttribute(
+    SessionAttributeKey.COMMON_SCREEN_NAME.getKey(),
+    "LOU Applicant Search");
+```
+
+Replace this with an annotation-based solution that uses a centralized `PageName` enum.
+
+## Requirements
+
+### 1. Create a custom annotation
+
+Create an annotation named `@ScreenName`.
+
+The annotation must be applicable to both:
+- Controller classes
+- Controller methods
+
+Instead of accepting a `String`, it should accept a `PageName` enum.
+
+Example:
+
+```java
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ScreenName {
+    PageName value();
+}
+```
+
+---
+
+### 2. Create a `PageName` enum
+
+Create an enum that centralizes all screen names.
+
+Example:
+
+```java
+public enum PageName {
+
+    LOU_APPLICANT_SEARCH("LOU Applicant Search"),
+    LOU_APPLICANT_DETAIL("LOU Applicant Detail");
+
+    private final String displayName;
+
+    PageName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+}
+```
+
+All screen names must be defined in this enum.
+
+No hardcoded screen name strings should remain in controllers.
+
+---
+
+### 3. Annotation Resolution
+
+Support annotations on both:
+
+- Controller class
+- Controller method
+
+Resolution priority:
+
+1. Method annotation (highest priority)
+2. Controller class annotation
+3. Do nothing if neither exists
+
+Use:
+
+```java
+AnnotatedElementUtils.findMergedAnnotation(...)
+```
+
+to resolve annotations.
+
+---
+
+### 4. Implement a HandlerInterceptor
+
+Create a Spring `HandlerInterceptor` that:
+
+- Resolves the `@ScreenName` annotation
+- Retrieves the enum value
+- Stores the display name using:
+
+```java
+request.setAttribute(
+    SessionAttributeKey.COMMON_SCREEN_NAME.getKey(),
+    pageName.getDisplayName());
+```
+
+or
+
+```java
+request.getSession().setAttribute(
+    SessionAttributeKey.COMMON_SCREEN_NAME.getKey(),
+    pageName.getDisplayName());
+```
+
+Choose whichever matches the existing application behavior.
+
+---
+
+### 5. Register the interceptor
+
+Register the interceptor using `WebMvcConfigurer`.
+
+---
+
+### 6. Refactor controllers
+
+Remove all duplicated code like:
+
+```java
+session.setAttribute(
+    SessionAttributeKey.COMMON_SCREEN_NAME.getKey(),
+    "LOU Applicant Search");
+```
+
+Replace with annotations.
+
+Example:
+
+```java
+@Controller
+@RequestMapping("/lou")
+@ScreenName(PageName.LOU_APPLICANT_SEARCH)
+public class LouApplicantController {
+
+    @GetMapping
+    public String show(...) {
+        ...
+    }
+
+    @GetMapping("/detail")
+    @ScreenName(PageName.LOU_APPLICANT_DETAIL)
+    public String detail(...) {
+        ...
+    }
+}
+```
+
+---
+
+## Expected Project Structure
+
+```
+annotation/
+    ScreenName.java
+
+enum/
+    PageName.java
+
+interceptor/
+    ScreenNameInterceptor.java
+
+config/
+    WebMvcConfig.java
+```
+
+---
+
+## Expected Behavior
+
+Given:
+
+```java
+@Controller
+@ScreenName(PageName.LOU_APPLICANT_SEARCH)
+public class LouApplicantController {
+```
+
+Every handler method automatically uses:
+
+```
+LOU Applicant Search
+```
+
+If a method declares:
+
+```java
+@ScreenName(PageName.LOU_APPLICANT_DETAIL)
+```
+
+it overrides the controller-level annotation.
+
+---
+
+## Code Quality Requirements
+
+- Follow Spring Boot best practices.
+- Use `AnnotatedElementUtils.findMergedAnnotation()`.
+- Keep controllers free of screen-name handling logic.
+- Do not modify existing business logic.
+- Ensure the solution is reusable across all controllers.
+- Centralize all page names in the `PageName` enum.
+- Eliminate duplicated string literals to satisfy SonarQube.
+- Produce clean, maintainable, production-ready code with appropriate JavaDoc where beneficial.
