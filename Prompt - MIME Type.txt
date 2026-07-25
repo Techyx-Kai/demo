@@ -1,0 +1,264 @@
+# Standardize HTTP MIME Type Constants
+
+You are a senior Java engineer responsible for enforcing the project's coding standards.
+
+## Objective
+
+Standardize all HTTP MIME type string literals by replacing hardcoded values with constants from `HttpMimeTypeConstants`.
+
+This is a project-wide coding standard refactoring and is **not** limited to SonarQube duplicate literal issues.
+
+---
+
+# Single Responsibility Principle
+
+HTTP MIME types belong in:
+
+```
+constants/http/HttpMimeTypeConstants
+```
+
+Do not place MIME types inside:
+
+- Excel constants
+- File extension constants
+- Export constants
+- Controller constants
+
+MIME types represent HTTP content types and should have a single source of truth.
+
+---
+
+# Standard
+
+Replace every hardcoded MIME type with the corresponding constant.
+
+Examples
+
+```java
+application/vnd.ms-excel
+```
+
+↓
+
+```java
+HttpMimeTypeConstants.APPLICATION_VND_MS_EXCEL
+```
+
+---
+
+```java
+application/octet-stream
+```
+
+↓
+
+```java
+HttpMimeTypeConstants.APPLICATION_OCTET_STREAM
+```
+
+---
+
+```java
+application/pdf
+```
+
+↓
+
+```java
+HttpMimeTypeConstants.APPLICATION_PDF
+```
+
+---
+
+```java
+application/json
+```
+
+↓
+
+```java
+HttpMimeTypeConstants.APPLICATION_JSON
+```
+
+---
+
+```java
+text/html
+```
+
+↓
+
+```java
+HttpMimeTypeConstants.TEXT_HTML
+```
+
+---
+
+```java
+text/plain
+```
+
+↓
+
+```java
+HttpMimeTypeConstants.TEXT_PLAIN
+```
+
+---
+
+```java
+text/csv
+```
+
+↓
+
+```java
+HttpMimeTypeConstants.TEXT_CSV
+```
+
+---
+
+```java
+application/xml
+```
+
+↓
+
+```java
+HttpMimeTypeConstants.APPLICATION_XML
+```
+
+---
+
+```java
+application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+```
+
+↓
+
+```java
+HttpMimeTypeConstants.APPLICATION_VND_OPENXML_SPREADSHEET
+```
+
+---
+
+# Rules
+
+## Replace ALL MIME Type Literals
+
+Do not limit replacements to duplicated literals reported by SonarQube.
+
+Replace every MIME type string literal with the corresponding constant.
+
+---
+
+## Search Before Creating
+
+Before adding a constant:
+
+1. Search `HttpMimeTypeConstants`.
+2. Reuse existing constants whenever possible.
+3. Only add missing constants.
+
+Do not create duplicate constants.
+
+---
+
+## Preserve Behaviour
+
+Do not change:
+
+- HTTP responses
+- Content-Type headers
+- File downloads
+- Browser behavior
+- Export functionality
+- API contracts
+
+Only replace string literals.
+
+---
+
+## Scope
+
+Apply to:
+
+- Controllers
+- Filters
+- Servlets
+- REST APIs
+- Download utilities
+- File export services
+- Excel export
+- PDF export
+- CSV export
+- ResponseEntity
+- HttpServletResponse
+
+---
+
+# Examples
+
+Before
+
+```java
+response.setContentType("application/vnd.ms-excel");
+```
+
+After
+
+```java
+response.setContentType(HttpMimeTypeConstants.APPLICATION_VND_MS_EXCEL);
+```
+
+---
+
+Before
+
+```java
+response.setContentType("application/octet-stream");
+```
+
+After
+
+```java
+response.setContentType(HttpMimeTypeConstants.APPLICATION_OCTET_STREAM);
+```
+
+---
+
+# Validation
+
+Verify that:
+
+- No remaining hardcoded MIME types exist.
+- Existing constants were reused whenever possible.
+- No duplicate constants were introduced.
+- HTTP responses remain identical.
+- Download behavior is unchanged.
+
+---
+
+# Output Requirements
+
+Provide:
+
+1. Files modified.
+2. Constants reused.
+3. New constants added (if any).
+4. Confirmation that:
+   - HTTP behavior is unchanged.
+   - Content-Type headers are unchanged.
+   - API contracts are unchanged.
+   - Only MIME type standardization was performed.
+
+---
+
+# Golden Rules
+
+1. `HttpMimeTypeConstants` is the single source of truth for all HTTP MIME types.
+2. Replace every hardcoded MIME type with the corresponding constant.
+3. Reuse existing constants before creating new ones.
+4. Follow the Single Responsibility Principle.
+5. Preserve 100% functional equivalence.

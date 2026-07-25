@@ -1,0 +1,347 @@
+# Standardize Excel Export Constants
+
+You are a senior Java engineer responsible for enforcing the project's coding standards.
+
+## Objective
+
+Standardize all Excel export related string literals by replacing hardcoded values with dedicated constants.
+
+This is a **project-wide coding standard refactoring**, not just a SonarQube duplicate literal fix.
+
+---
+
+# Single Responsibility Principle
+
+Do **not** create a generic constants class.
+
+Organize constants according to their responsibility.
+
+---
+
+# Excel HTML
+
+HTML fragments used to generate Excel output belong in:
+
+```
+enums/excel/ExcelHtmlConstants
+```
+
+Examples:
+
+```java
+<table>
+</table>
+<tr>
+</tr>
+<td>
+</td>
+</td></tr>
+```
+
+Excel HTML formatting:
+
+```java
+<td style='mso-number-format:"\@";'>
+<td style='mso-number-format:"#,##0.00";'>
+<td style='mso-number-format:"0.00%";'>
+```
+
+---
+
+# Excel Sheet Names
+
+Worksheet names belong in:
+
+```
+enums/excel/ExcelSheetConstants
+```
+
+Examples:
+
+```java
+Sheet1
+Summary
+Detail
+Report
+Loan
+Export
+```
+
+Example:
+
+```java
+ExcelSheetConstants.DEFAULT_SHEET
+ExcelSheetConstants.SUMMARY
+ExcelSheetConstants.DETAIL
+```
+
+Do not hardcode worksheet names.
+
+---
+
+# Excel MIME Types
+
+Belong in
+
+```
+enums/excel/ExcelMimeTypeConstants
+```
+
+Examples
+
+```java
+application/vnd.ms-excel
+application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+```
+
+---
+
+# Excel File Extensions
+
+Belong in
+
+```
+enums/excel/ExcelFileExtensionConstants
+```
+
+Examples
+
+```java
+.xls
+.xlsx
+.csv
+```
+
+---
+
+# Excel Number Formats
+
+Number formatting patterns belong in
+
+```
+NumericFormatConstants
+```
+
+Examples
+
+```java
+#,##0.00
+#,##0.00;-#,##0.00
+0.00%
+0
+```
+
+---
+
+# Date Formats
+
+Date formatting belongs in
+
+```
+DateFormatConstants
+TimeFormatConstants
+DateTimeFormatConstants
+```
+
+Never place date formats inside Excel constants.
+
+---
+
+# Rules
+
+## Replace ALL Hardcoded Literals
+
+Replace every Excel-related string literal with the appropriate constant.
+
+Do not limit replacements to duplicated literals reported by SonarQube.
+
+---
+
+## Search Before Creating
+
+Before adding a constant:
+
+1. Search the destination constants class.
+2. Reuse existing constants whenever possible.
+3. Only add missing constants.
+
+Never introduce duplicate constants.
+
+---
+
+## Preserve Behaviour
+
+Do not change:
+
+- generated HTML
+- workbook structure
+- worksheet names
+- formatting
+- formulas
+- styles
+- merged cells
+- business logic
+- export order
+
+The generated Excel file must remain identical.
+
+---
+
+## Minimize Changes
+
+Only replace string literals.
+
+Do not:
+
+- refactor export logic
+- rename methods
+- rename variables
+- change StringBuilder logic
+- optimize code
+- reformat unrelated code
+
+---
+
+## Scope
+
+Apply to
+
+- Controllers
+- Services
+- Export utilities
+- Excel builders
+- Apache POI
+- JXL
+- HTML-based Excel exports
+- JSP-generated Excel exports
+
+---
+
+# Examples
+
+## HTML
+
+Before
+
+```java
+builder.append("<table>");
+builder.append("<tr>");
+builder.append("<td>");
+```
+
+After
+
+```java
+builder.append(ExcelHtmlConstants.TABLE_START);
+builder.append(ExcelHtmlConstants.ROW_START);
+builder.append(ExcelHtmlConstants.CELL_START);
+```
+
+---
+
+## Excel Formatting
+
+Before
+
+```java
+builder.append("<td style='mso-number-format:\"#,##0.00\";'>");
+```
+
+After
+
+```java
+builder.append(ExcelHtmlConstants.DECIMAL_CELL_START);
+```
+
+---
+
+## Worksheet Names
+
+Before
+
+```java
+workbook.createSheet("Sheet1");
+```
+
+After
+
+```java
+workbook.createSheet(ExcelSheetConstants.DEFAULT_SHEET);
+```
+
+---
+
+## MIME Types
+
+Before
+
+```java
+response.setContentType("application/vnd.ms-excel");
+```
+
+After
+
+```java
+response.setContentType(ExcelMimeTypeConstants.XLS);
+```
+
+---
+
+## File Extensions
+
+Before
+
+```java
+fileName += ".xls";
+```
+
+After
+
+```java
+fileName += ExcelFileExtensionConstants.XLS;
+```
+
+---
+
+# Validation
+
+Verify that
+
+- No remaining hardcoded Excel HTML fragments exist.
+- No remaining hardcoded worksheet names exist.
+- No remaining hardcoded Excel MIME types exist.
+- No remaining hardcoded Excel file extensions exist.
+- Existing constants are reused whenever possible.
+- No duplicate constants are introduced.
+- Generated Excel output is identical before and after refactoring.
+
+---
+
+# Output Requirements
+
+Provide
+
+1. Files modified.
+2. Constants reused.
+3. New constants added.
+4. Reason each constants class was chosen.
+5. Confirmation that
+
+- functionality is unchanged
+- workbook structure is unchanged
+- worksheet names are unchanged
+- formatting is unchanged
+- export output is unchanged
+- only constant standardization was performed
+
+---
+
+# Golden Rules
+
+1. Follow the **Single Responsibility Principle**.
+2. Reuse existing constants before creating new ones.
+3. Standardize **all** Excel-related string literals, not just duplicated ones.
+4. Do not use generic constants classes.
+5. Keep changes minimal.
+6. Preserve 100% functional equivalence.
+7. `ExcelHtmlConstants`, `ExcelSheetConstants`, `ExcelMimeTypeConstants`, `ExcelFileExtensionConstants`, and `NumericFormatConstants` are the single sources of truth for their respective domains.
