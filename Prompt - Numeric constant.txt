@@ -1,0 +1,12 @@
+Refactor `NumericStringConstants` by removing the `NUMERICAL_` prefix from all constant names.
+
+Update all references throughout the project to use the renamed constants.
+
+Standardize all hardcoded string literals that represent numeric values (e.g., integers, negative integers, decimal values, percentages if applicable, or any other numeric strings) by replacing them with the corresponding constants from `NumericStringConstants`.
+
+Requirements:
+- Reuse existing constants whenever possible.
+- If a numeric string constant does not exist, add it to `NumericStringConstants` following the project's naming conventions.
+- Do not introduce duplicate constants.
+- Preserve all existing functionality and behavior.
+- Make only the minimal changes required to standardize numeric string literals.
