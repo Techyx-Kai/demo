@@ -1,0 +1,32 @@
+Refactor the legacy DAO layer incrementally to the new Spring Boot architecture.
+
+Architecture:
+- Interfaces: com.aiab.hccss.daos
+- Implementations: com.aiab.hccss.daos.impl
+- Legacy code: com.aiab.CreditControl.service
+
+Migration strategy:
+
+Phase 1:
+- Create DAO interfaces.
+- Create @Repository implementations.
+- Delegate to the legacy DAO using constructor injection.
+- Do not instantiate legacy classes using 'new'.
+
+Phase 2:
+- Migrate one DAO method at a time.
+- Replace manual JDBC with JdbcTemplate, NamedParameterJdbcTemplate or SimpleJdbcCall.
+- Remove DBManagerUtils.
+- Remove manual resource management.
+- Preserve SQL and business logic.
+
+Phase 3:
+- Remove all dependencies on the legacy package.
+- Delete legacy classes after migration is complete.
+
+General requirements:
+- Follow Spring Boot 3.x best practices.
+- Use constructor injection only.
+- Produce SonarQube-compliant code.
+- Preserve backward compatibility during migration.
+- Do not perform a big-bang rewrite; migrate incrementally.
