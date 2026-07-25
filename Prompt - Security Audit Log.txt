@@ -1,0 +1,641 @@
+# Enterprise Security Audit Logging Framework Analysis & Design Prompt
+
+## Objective
+
+Analyze the entire Spring Boot application and design an enterprise-grade Security Audit Logging Framework.
+
+The framework shall support Java 21 and Spring Boot 3.
+
+The framework shall integrate with the existing Enterprise Logging Framework (EFK).
+
+The framework shall be reusable across multiple Spring Boot applications.
+
+The implementation shall require minimal configuration.
+
+The framework shall automatically discover metadata from the application instead of relying on large application.properties or application.yml configurations.
+
+The purpose of this task is NOT to immediately generate code.
+
+The AI shall first analyze the project and generate an Audit Review Specification.
+
+Only after the review specification is completed should the implementation be designed.
+
+---
+
+# Technology
+
+- Java 21
+- Spring Boot 3.x
+- Spring MVC
+- Spring Security
+- Jackson
+- SLF4J
+- MDC
+- Logback
+- HandlerInterceptor
+- RequestBodyAdvice
+
+Do not use Lombok.
+
+Use explicit constructors.
+
+Follow Spring Boot best practices.
+
+---
+
+# Project Analysis
+
+Analyze the entire project.
+
+Scan every package.
+
+Scan every Java class.
+
+Identify
+
+- Controllers
+- Request DTOs
+- Response DTOs
+- Form Objects
+- Model Attributes
+- Services
+- Exception Handlers
+
+Do not modify existing business logic.
+
+---
+
+# Controller Discovery
+
+Scan every
+
+@RestController
+
+@Controller
+
+For every Controller
+
+Identify
+
+- Class Name
+
+- Base Request Mapping
+
+- Endpoint
+
+- HTTP Method
+
+- Controller Method
+
+- Request Type
+
+- Response Type
+
+Determine whether the method should be audited.
+
+Only methods annotated with
+
+@SecurityAudit
+
+shall be considered audit endpoints.
+
+---
+
+# Module and Action Discovery
+
+For every @SecurityAudit annotation
+
+Extract
+
+Module
+
+Example
+
+CLAIM
+
+CUSTOMER
+
+AUTHENTICATION
+
+PAYMENT
+
+Action
+
+Example
+
+CREATE
+
+UPDATE
+
+DELETE
+
+SEARCH
+
+LOGIN
+
+LOGOUT
+
+DOWNLOAD
+
+APPROVE
+
+REJECT
+
+Generate a Module/Action Registry.
+
+---
+
+# Request Model Discovery
+
+Automatically discover every request source.
+
+Supported request types
+
+@RequestBody
+
+@RequestParam
+
+@PathVariable
+
+@ModelAttribute
+
+Multipart
+
+HttpServletRequest
+
+For every request model
+
+Discover every Java Bean property using Jackson Bean Introspection.
+
+Do not rely on reflection only.
+
+Reuse Spring's configured ObjectMapper whenever possible.
+
+---
+
+# Unified Request Model
+
+The framework shall support
+
+application/json
+
+application/x-www-form-urlencoded
+
+multipart/form-data
+
+query parameters
+
+path variables
+
+The framework shall build one Unified Request Model.
+
+BusinessFieldExtractor shall read only from this unified model.
+
+The framework shall never manually parse JSON.
+
+For application/json
+
+Capture the deserialized request using RequestBodyAdvice.
+
+---
+
+# Audit Review Specification
+
+Generate an Audit Review Specification.
+
+The report shall contain one section for every audited endpoint.
+
+Example
+
+================================================================================
+
+Module
+
+CLAIM
+
+Action
+
+APPROVE
+
+Controller
+
+ClaimController
+
+Method
+
+approveClaim()
+
+Endpoint
+
+POST /claim/approve
+
+Request DTO
+
+ApproveClaimRequest
+
+================================================================================
+
+Discovered Request Sources
+
+✓ RequestBody
+
+✓ Query Parameters
+
+✓ Path Variables
+
+✓ Model Attributes
+
+✓ Multipart
+
+================================================================================
+
+Discovered Request Fields
+
+| Include | Mask | Field Name | Java Type | Request Source | Suggested Classification | Suggested Mask Pattern | Recommendation | Reason | Reviewer Decision |
+|----------|------|------------|-----------|----------------|--------------------------|------------------------|----------------|--------|------------------|
+| [ ] | [ ] | claimNo | String | RequestBody | Business Identifier | None | Include | Primary business identifier | |
+| [ ] | [x] | policyNo | String | RequestBody | Policy Number | PL******789 | Include | Sensitive business identifier | |
+| [ ] | [x] | customerName | String | RequestBody | Person Name | J*** T** | Include | Personally identifiable | |
+| [ ] | [x] | contactNumber | String | RequestBody | Contact Number | 012****789 | Include | Personally identifiable | |
+| [ ] | [x] | emailAddress | String | RequestBody | Email Address | j***@company.com | Include | Personally identifiable | |
+| [ ] | [ ] | remarks | String | RequestBody | Free Text | None | Review | Review business need | |
+| [ ] | [ ] | attachment | MultipartFile | Multipart | Binary Data | Never Log | Exclude | Binary content | |
+| [ ] | [ ] | password | String | RequestBody | Credential | Never Log | Exclude | Secret | |
+| [ ] | [ ] | accessToken | String | Header | Security Token | Never Log | Exclude | Secret | |
+| [ ] | [ ] | csrfToken | String | RequestBody | Security Token | Never Log | Exclude | Secret | |
+
+================================================================================
+
+Legend
+
+Include
+
+[x] Log
+
+[ ] Do Not Log
+
+Mask
+
+[x] Apply Mask
+
+[ ] No Mask
+
+The first three recommendation columns shall be generated automatically by AI.
+
+The final reviewer columns shall remain blank for application teams to complete.
+
+---
+
+# AI Recommendation Rules
+
+For every discovered request field
+
+AI shall recommend
+
+1.
+
+Should the field be logged?
+
+Yes
+
+No
+
+Review
+
+2.
+
+Should the field be masked?
+
+Yes
+
+No
+
+3.
+
+Suggested Classification
+
+Examples
+
+Business Identifier
+
+Policy Number
+
+Customer Identifier
+
+Person Name
+
+Address
+
+Contact Number
+
+Email Address
+
+Government Identifier
+
+Financial Amount
+
+Credential
+
+Token
+
+Session Identifier
+
+Binary Data
+
+Attachment
+
+Free Text
+
+Audit Metadata
+
+Technical Metadata
+
+4.
+
+Suggested Mask Pattern
+
+Examples
+
+Person Name
+
+John Tan
+
+↓
+
+J*** T**
+
+Email
+
+john.tan@company.com
+
+↓
+
+j***.tan@company.com
+
+Policy Number
+
+PL123456789
+
+↓
+
+PL******789
+
+Phone Number
+
+0123456789
+
+↓
+
+012****789
+
+Government ID
+
+900101015555
+
+↓
+
+9001******55
+
+Credential
+
+Never Log
+
+Token
+
+Never Log
+
+MultipartFile
+
+Never Log
+
+5.
+
+Recommendation
+
+Include
+
+Exclude
+
+Review
+
+6.
+
+Reason
+
+Explain why.
+
+---
+
+# Startup Audit Report
+
+Generate a startup report listing
+
+Module
+
+Action
+
+Endpoint
+
+Controller
+
+Request DTO
+
+Detected Request Sources
+
+Detected Fields
+
+Potential PII
+
+Suggested Audit Fields
+
+Fields Recommended For Exclusion
+
+---
+
+# Metadata Registry
+
+Generate an in-memory AuditMetadataRegistry.
+
+The registry shall contain
+
+Module
+
+Action
+
+Controller
+
+Method
+
+Request Type
+
+Response Type
+
+Detected Fields
+
+Selected Fields
+
+PII Fields
+
+Masking Strategy
+
+No module/action mapping shall exist inside application.properties.
+
+---
+
+# Optional Metadata Override
+
+Support an optional audit-metadata.yml.
+
+It shall contain only reviewer-approved decisions.
+
+Example
+
+CLAIM
+
+APPROVE
+
+include-fields
+
+claimNo
+
+policyNo
+
+transactionId
+
+mask-fields
+
+policyNo
+
+exclude-fields
+
+remarks
+
+attachment
+
+password
+
+The metadata file shall be concise.
+
+The framework shall never require listing every request field.
+
+---
+
+# Security Audit Framework Design
+
+Design reusable components.
+
+Examples
+
+SecurityAuditInterceptor
+
+RequestBodyCaptureAdvice
+
+RequestDataProvider
+
+BusinessFieldExtractor
+
+AuditMetadataScanner
+
+AuditMetadataRegistry
+
+AuditReviewReportGenerator
+
+PiiMaskingService
+
+JsonAuditSerializer
+
+SecurityAuditLogger
+
+MdcUtil
+
+SecurityAuditProperties
+
+WebMvcConfigurer
+
+Each component shall have a single responsibility.
+
+---
+
+# Performance
+
+The framework shall
+
+scan controllers only once
+
+cache metadata
+
+reuse ObjectMapper
+
+avoid repeated reflection
+
+avoid repeated serialization
+
+support high concurrency
+
+minimize latency
+
+---
+
+# Deliverables
+
+Generate
+
+1. Architecture Diagram
+
+2. Sequence Diagram
+
+3. Class Diagram
+
+4. Component Diagram
+
+5. Package Structure
+
+6. Startup Flow
+
+7. Runtime Flow
+
+8. Audit Review Specification
+
+9. Module Action Registry
+
+10. Request Model Registry
+
+11. Unified Request Model Design
+
+12. Metadata Registry Design
+
+13. PII Detection Rules
+
+14. Masking Rules
+
+15. Audit Metadata Template
+
+16. Security Audit Framework Design
+
+17. Unit Test Plan
+
+18. Integration Test Plan
+
+19. Sample Enterprise Logs
+
+20. Sample audit-metadata.yml
+
+21. Java implementation skeletons
+
+22. Extension points for future enhancement
+
+---
+
+# Expected Outcome
+
+The final solution shall:
+
+- automatically discover all controllers annotated with `@SecurityAudit`;
+- automatically discover request DTOs, form objects, query parameters, path variables, model attributes, multipart fields, and JSON request bodies;
+- generate an Audit Review Specification with AI recommendations for logging, masking, classification, and masking patterns;
+- leave the final logging and masking decisions to application reviewers;
+- support React and Spring Boot REST APIs using `application/json`;
+- eliminate the need for large `application.properties` configurations;
+- centralize audit metadata in a lightweight optional `audit-metadata.yml`;
+- produce standardized enterprise security audit logs that integrate with the existing EFK logging standard;
+- be reusable, extensible, and suitable for enterprise governance across multiple applications.
