@@ -1,0 +1,73 @@
+Refactor the SonarQube issue "Define a constant instead of duplicating this literal".
+
+Requirements:
+
+1. Replace duplicated string literals with existing constants whenever possible.
+2. Before creating a new constant, search the project for an existing constant or enum that already represents the value.
+3. Use the following mapping rules:
+
+### Web / Session
+- If the string is used as an HttpSession attribute name, HttpServletRequest attribute, ServletContext attribute, Flash attribute, or any web session/request key,
+  use or create:
+  enums/Web/SessionAttributeKey
+
+### Web / Model
+- If the string is used as a Spring MVC Model attribute, ModelMap, ModelAndView, request model, view model, Thymeleaf/JSP model attribute,
+  use or create:
+  enums/Web/ModelAttributeKey
+
+### Database
+- If the string is a database column name, ResultSet lookup (e.g. rs.getString("...")), ResultSetMetaData, RowMapper, JDBC, SQL alias, CallableStatement, PreparedStatement mapping,
+  use or create:
+  enums/database/DatabaseFieldConstant
+
+### Other domains
+Infer the appropriate module and place constants accordingly.
+
+Examples:
+
+- Security-related keys
+  enums/security/SecurityConstant
+
+- Cache keys
+  enums/cache/CacheKey
+
+- API endpoints
+  enums/api/ApiConstant
+
+- Configuration/property keys
+  enums/config/ConfigKey
+
+- Date formats
+  enums/date/DateFormatConstant
+
+- Validation messages
+  enums/validation/ValidationConstant
+
+- Error messages
+  enums/error/ErrorConstant
+
+- Logging messages
+  enums/logging/LogConstant
+
+- Email constants
+  enums/mail/MailConstant
+
+- File paths
+  enums/file/FileConstant
+
+- Business domain literals
+  Place under the corresponding business module.
+
+4. Do NOT create a generic Constants class.
+5. Keep constants grouped by responsibility (Single Responsibility Principle).
+6. Preserve existing behavior.
+7. Update imports as necessary.
+8. If multiple files use the same literal, reuse the same constant.
+9. If the literal only appears once after refactoring, do not introduce unnecessary constants unless required by project conventions.
+10. Follow existing naming conventions in the project.
+
+Output:
+- Show the refactored code.
+- Mention which constants were reused.
+- Mention any newly created enum/constants and their locations.
