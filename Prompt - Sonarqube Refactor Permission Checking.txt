@@ -1,0 +1,262 @@
+# Refactor Permission Checking Using Spring Annotation
+
+## Goal
+
+Refactor the Spring MVC application to eliminate duplicated permission checking logic in controllers.
+
+Current controllers contain code similar to:
+
+```java
+String userId = resolveUserId(session);
+
+session.setAttribute(
+    SessionAttributeKey.COMMON_AUTHORIZED_LEVEL.getKey(),
+    "00");
+
+if (!NumericStringConstants.ZERO.equalsIgnoreCase(
+        authDao.isAuthorized(userId, PermissionName.TRANS_BREAKDOWN.getKey()))) {
+
+    model.addAttribute(
+        ModelAttributeKey.ERRORMESSAGE.getKey(),
+        "No permission to access Bankruptcy screen.");
+
+    return VIEW;
+}
+
+session.setAttribute(
+    SessionAttributeKey.COMMON_AUTHORIZED_LEVEL.getKey(),
+    authDao.authorizedLevel(userId, PermissionName.TRANS_BREAKDOWN.getKey()));
+```
+
+This logic is duplicated across many controller methods and should be replaced with an annotation-based solution.
+
+---
+
+## Requirements
+
+### 1. Create a custom annotation
+
+Create an annotation named:
+
+```java
+@RequiresPermission
+```
+
+Applicable to:
+
+- Controller classes
+- Controller methods
+
+Method annotation overrides class annotation.
+
+The annotation should be defined as:
+
+```java
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface RequiresPermission {
+
+    boolean loginRequired() default true;
+
+    PermissionName value();
+
+    PermissionLevel[] levels() default {};
+}
+```
+
+`value()` replaces the existing `permissionName()` property.
+
+---
+
+### 2. Permission Resolution
+
+Resolve annotations using:
+
+```java
+AnnotatedElementUtils.findMergedAnnotation(...)
+```
+
+Priority:
+
+1. Method annotation
+2. Controller annotation
+3. No permission validation if annotation is absent
+
+---
+
+### 3. Implement a HandlerInterceptor
+
+Create a `PermissionInterceptor`.
+
+Responsibilities:
+
+#### Resolve User ID
+
+Obtain the current user ID using the application's existing mechanism (e.g. `resolveUserId(session)` or equivalent shared utility).
+
+---
+
+#### Reset Authorized Level
+
+Always reset:
+
+```java
+session.setAttribute(
+    SessionAttributeKey.COMMON_AUTHORIZED_LEVEL.getKey(),
+    "00");
+```
+
+before permission validation.
+
+---
+
+#### Validate Permission
+
+Call the existing DAO:
+
+```java
+authDao.isAuthorized(
+    userId,
+    permission.value().getKey());
+```
+
+If authorization fails:
+
+- Add an error message
+
+```java
+model.addAttribute(
+    ModelAttributeKey.ERRORMESSAGE.getKey(),
+    "No permission to access <Screen Name>.");
+```
+
+or an equivalent request attribute if `Model` is unavailable in the interceptor.
+
+- Prevent controller execution.
+- Forward or redirect to the application's standard "no permission" page (reuse the existing application behavior).
+
+Do not continue to the controller.
+
+---
+
+#### Authorized User
+
+If authorization succeeds:
+
+Retrieve the authorized level.
+
+```java
+String level = authDao.authorizedLevel(
+    userId,
+    permission.value().getKey());
+```
+
+Store it into session.
+
+```java
+session.setAttribute(
+    SessionAttributeKey.COMMON_AUTHORIZED_LEVEL.getKey(),
+    level);
+```
+
+Then continue processing.
+
+---
+
+### 4. Permission Levels
+
+If
+
+```java
+levels().length > 0
+```
+
+validate that the returned authorized level is one of the permitted `PermissionLevel` values.
+
+If not:
+
+- Treat it as unauthorized.
+- Return the standard "No permission" response.
+
+---
+
+### 5. Register the interceptor
+
+Register using:
+
+```java
+WebMvcConfigurer
+```
+
+Apply to all controller mappings.
+
+---
+
+### 6. Refactor Controllers
+
+Remove duplicated permission checking logic.
+
+Replace
+
+```java
+String userId = resolveUserId(session);
+
+session.setAttribute(...);
+
+if (...) {
+    ...
+}
+
+session.setAttribute(...);
+```
+
+with
+
+```java
+@RequiresPermission(PermissionName.TRANS_BREAKDOWN)
+```
+
+or
+
+```java
+@RequiresPermission(
+    value = PermissionName.TRANS_BREAKDOWN,
+    levels = {
+        PermissionLevel.UPDATE,
+        PermissionLevel.APPROVE
+    }
+)
+```
+
+Controllers should only contain business logic.
+
+---
+
+## Expected Project Structure
+
+```
+annotation/
+    RequiresPermission.java
+    ScreenName.java
+
+interceptor/
+    PermissionInterceptor.java
+    ScreenNameInterceptor.java
+
+config/
+    WebMvcConfig.java
+```
+
+---
+
+## Code Quality
+
+- Follow Spring Boot best practices.
+- Use `AnnotatedElementUtils.findMergedAnnotation()`.
+- Method annotation overrides class annotation.
+- Reuse existing `AuthDao`.
+- Do not modify business logic.
+- Keep controllers free of authorization logic.
+- Reset the authorized level before every permission check.
+- Store the authorized level in session after successful authorization.
+- Keep the implementation reusable, maintainable, and production-ready.

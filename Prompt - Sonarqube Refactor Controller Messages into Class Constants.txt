@@ -1,0 +1,124 @@
+# Refactor Controller Messages into Class Constants
+
+## Goal
+
+Refactor all controllers to eliminate duplicated string literals by extracting repeated messages into `private static final` class constants.
+
+Do not change any business logic.
+
+## Requirements
+
+### Extract duplicated messages
+
+Move repeated string literals such as:
+
+```java
+"No permission to access Bankruptcy screen."
+"Please enter at least one search criterion."
+"Invalid application number."
+```
+
+into class-level constants.
+
+Example:
+
+```java
+private static final String ERROR_NO_PERMISSION =
+        "No permission to access Bankruptcy screen.";
+
+private static final String ERROR_SEARCH_CRITERIA_REQUIRED =
+        "Please enter at least one search criterion.";
+
+private static final String ERROR_INVALID_APPLICATION_NUMBER =
+        "Invalid application number.";
+```
+
+Replace usages:
+
+Before:
+
+```java
+model.addAttribute(
+    ModelAttributeKey.ERRORMESSAGE.getKey(),
+    "Please enter at least one search criterion.");
+```
+
+After:
+
+```java
+model.addAttribute(
+    ModelAttributeKey.ERRORMESSAGE.getKey(),
+    ERROR_SEARCH_CRITERIA_REQUIRED);
+```
+
+---
+
+## Naming Convention
+
+Use descriptive constant names.
+
+Examples:
+
+```java
+ERROR_NO_PERMISSION
+ERROR_SEARCH_CRITERIA_REQUIRED
+ERROR_INVALID_APPLICATION_NUMBER
+ERROR_INVALID_DATE_RANGE
+ERROR_RECORD_NOT_FOUND
+SUCCESS_SAVE
+SUCCESS_UPDATE
+SUCCESS_DELETE
+```
+
+Avoid generic names like:
+
+```java
+MESSAGE1
+MSG
+TEXT
+```
+
+---
+
+## Scope
+
+Only extract constants that are used within the same controller.
+
+If the same message is shared across multiple controllers, suggest moving it to a shared constants class instead of duplicating it.
+
+Example:
+
+```java
+public final class ErrorMessages {
+
+    private ErrorMessages() {}
+
+    public static final String SEARCH_CRITERIA_REQUIRED =
+            "Please enter at least one search criterion";
+
+    public static final String NO_PERMISSION =
+            "No permission to access this page.";
+}
+```
+
+---
+
+## Do Not Change
+
+- Business logic
+- Validation logic
+- Method signatures
+- Return values
+- Existing functionality
+
+Only replace hardcoded string literals with constants.
+
+---
+
+## Code Style
+
+- Constants should be declared at the top of the class.
+- Use `private static final String`.
+- Group related constants together.
+- Remove duplicated literals to satisfy SonarQube.
+- Keep the code clean, readable, and maintainable.
