@@ -1,0 +1,416 @@
+# Standardize HTTP Web Constants
+
+You are a senior Java engineer responsible for enforcing the project's coding standards.
+
+## Objective
+
+Standardize all hardcoded HTTP-related string literals by replacing them with the appropriate enums under `enums/web`.
+
+This is a **project-wide coding standard refactoring**, not just a SonarQube duplicate literal fix.
+
+The generated code must remain **100% functionally equivalent**.
+
+---
+
+# Single Responsibility Principle
+
+Do **not** create generic constants classes.
+
+Each enum must have a single responsibility.
+
+---
+
+# HTTP Header Keys
+
+HTTP header names belong in
+
+```
+enums/web/HttpHeaderKey
+```
+
+Examples
+
+```java
+Content-Type
+Content-Disposition
+Cache-Control
+Pragma
+Expires
+Content-Length
+Content-Encoding
+Location
+Accept
+Authorization
+User-Agent
+```
+
+Example
+
+Before
+
+```java
+response.setHeader("Cache-Control", value);
+```
+
+After
+
+```java
+response.setHeader(
+    HttpHeaderKey.CACHE_CONTROL.getKey(),
+    value
+);
+```
+
+---
+
+# HTTP Header Values
+
+Common HTTP header values belong in
+
+```
+enums/web/HttpHeaderValue
+```
+
+Examples
+
+```java
+public
+private
+no-cache
+no-store
+must-revalidate
+max-age=0
+attachment
+inline
+keep-alive
+close
+```
+
+Example
+
+Before
+
+```java
+response.setHeader("Pragma", "public");
+```
+
+After
+
+```java
+response.setHeader(
+    HttpHeaderKey.PRAGMA.getKey(),
+    HttpHeaderValue.PUBLIC.getValue()
+);
+```
+
+Example
+
+Before
+
+```java
+response.setHeader("Cache-Control", "max-age=0");
+```
+
+After
+
+```java
+response.setHeader(
+    HttpHeaderKey.CACHE_CONTROL.getKey(),
+    HttpHeaderValue.MAX_AGE_ZERO.getValue()
+);
+```
+
+---
+
+# HTTP MIME Types
+
+Content types belong in
+
+```
+enums/web/HttpMimeType
+```
+
+Examples
+
+```java
+application/json
+application/xml
+application/pdf
+application/octet-stream
+application/vnd.ms-excel
+application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+text/plain
+text/html
+text/csv
+multipart/form-data
+```
+
+Example
+
+Before
+
+```java
+response.setContentType("application/vnd.ms-excel");
+```
+
+After
+
+```java
+response.setContentType(
+    HttpMimeType.APPLICATION_VND_MS_EXCEL.getValue()
+);
+```
+
+---
+
+# Scope
+
+Apply to
+
+- Controllers
+- Servlets
+- Filters
+- REST APIs
+- Download controllers
+- File upload
+- File download
+- Excel export
+- PDF export
+- CSV export
+- Apache POI
+- HttpServletResponse
+- ResponseEntity
+- Spring MVC
+- Struts
+
+---
+
+# Rules
+
+## Replace ALL Hardcoded HTTP Literals
+
+Replace every hardcoded
+
+- HTTP header name
+- HTTP header value
+- MIME type
+
+with the appropriate enum.
+
+Do **not** limit replacements to duplicated literals reported by SonarQube.
+
+---
+
+## Search Before Creating
+
+Before adding a new enum value
+
+1. Search the destination enum.
+2. Reuse existing enum values whenever possible.
+3. Only add missing values.
+
+Never duplicate constants.
+
+---
+
+## Preserve Behaviour
+
+Do not change
+
+- HTTP responses
+- Content-Type
+- Response headers
+- Download behaviour
+- Browser caching
+- File names
+- Response status
+- Business logic
+- Framework behaviour
+
+Only replace string literals.
+
+---
+
+# Enum Responsibilities
+
+## HttpHeaderKey
+
+Contains only HTTP header names.
+
+Examples
+
+```java
+CONTENT_TYPE
+CONTENT_DISPOSITION
+CACHE_CONTROL
+PRAGMA
+EXPIRES
+CONTENT_LENGTH
+LOCATION
+```
+
+Expose
+
+```java
+getKey()
+```
+
+---
+
+## HttpHeaderValue
+
+Contains only reusable HTTP header values.
+
+Examples
+
+```java
+PUBLIC
+PRIVATE
+NO_CACHE
+NO_STORE
+MAX_AGE_ZERO
+MUST_REVALIDATE
+ATTACHMENT
+INLINE
+KEEP_ALIVE
+CLOSE
+```
+
+Expose
+
+```java
+getValue()
+```
+
+---
+
+## HttpMimeType
+
+Contains only MIME types.
+
+Examples
+
+```java
+APPLICATION_JSON
+APPLICATION_XML
+APPLICATION_PDF
+APPLICATION_OCTET_STREAM
+APPLICATION_VND_MS_EXCEL
+APPLICATION_VND_OPENXML_SPREADSHEET
+TEXT_HTML
+TEXT_PLAIN
+TEXT_CSV
+MULTIPART_FORM_DATA
+```
+
+Expose
+
+```java
+getValue()
+```
+
+---
+
+# Examples
+
+## Header Name
+
+Before
+
+```java
+response.setHeader("Content-Disposition", value);
+```
+
+After
+
+```java
+response.setHeader(
+    HttpHeaderKey.CONTENT_DISPOSITION.getKey(),
+    value
+);
+```
+
+---
+
+## Header Value
+
+Before
+
+```java
+response.setHeader("Pragma", "public");
+```
+
+After
+
+```java
+response.setHeader(
+    HttpHeaderKey.PRAGMA.getKey(),
+    HttpHeaderValue.PUBLIC.getValue()
+);
+```
+
+---
+
+## MIME Type
+
+Before
+
+```java
+response.setContentType("application/octet-stream");
+```
+
+After
+
+```java
+response.setContentType(
+    HttpMimeType.APPLICATION_OCTET_STREAM.getValue()
+);
+```
+
+---
+
+# Validation
+
+Verify
+
+- No remaining hardcoded HTTP header names.
+- No remaining hardcoded HTTP header values.
+- No remaining hardcoded MIME types.
+- Existing enums were reused whenever possible.
+- No duplicate enum values were introduced.
+- HTTP behaviour remains identical.
+- Browser compatibility is unchanged.
+- Download behaviour is unchanged.
+
+---
+
+# Output Requirements
+
+Provide
+
+1. Files modified.
+2. Existing enum values reused.
+3. New enum values added.
+4. Unused imports removed.
+5. Confirmation that
+
+- functionality is unchanged
+- HTTP behaviour is unchanged
+- response headers are unchanged
+- MIME types are unchanged
+- browser behaviour is unchanged
+- only HTTP constant standardization was performed
+
+---
+
+# Golden Rules
+
+1. Follow the **Single Responsibility Principle**.
+2. `HttpHeaderKey` is the single source of truth for HTTP header names.
+3. `HttpHeaderValue` is the single source of truth for reusable HTTP header values.
+4. `HttpMimeType` is the single source of truth for MIME types.
+5. Reuse existing enum values before creating new ones.
+6. Replace **all** hardcoded HTTP-related string literals, not only SonarQube duplicate literals.
+7. Do not create generic constants classes.
+8. Preserve 100% functional equivalence.
+9. Keep changes minimal and follow the project's existing architecture and coding standards.
