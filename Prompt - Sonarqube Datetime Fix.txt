@@ -1,0 +1,141 @@
+# Single Responsibility Principle for Date/Time Format Constants
+
+Organize date and time format constants according to their **single responsibility**. Do not place all patterns into a single constants class.
+
+Each class should contain only one category of format patterns.
+
+---
+
+## DateFormatConstants
+
+Contains **date-only** format patterns.
+
+Examples:
+
+```java
+MM_DD_YYYY
+DD_MM_YYYY
+YYYY_MM_DD
+YYYYMMDD
+```
+
+Examples:
+
+```java
+DateFormatConstants.MM_DD_YYYY
+DateFormatConstants.YYYY_MM_DD
+```
+
+---
+
+## TimeFormatConstants
+
+Contains **time-only** format patterns.
+
+Examples:
+
+```java
+HH_MM
+HH_MM_SS
+HH_MM_SS_SSS
+HHMMSS
+```
+
+Examples:
+
+```java
+TimeFormatConstants.HH_MM
+TimeFormatConstants.HH_MM_SS
+```
+
+---
+
+## DateTimeFormatConstants
+
+Contains **date and time** format patterns.
+
+Examples:
+
+```java
+YYYY_MM_DD_HH_MM_SS
+MM_DD_YYYY_HH_MM
+YYYYMMDDHHMMSS
+```
+
+Examples:
+
+```java
+DateTimeFormatConstants.YYYY_MM_DD_HH_MM_SS
+```
+
+---
+
+## TimestampFormatConstants
+
+Contains timestamp-specific formats.
+
+Examples:
+
+```java
+YYYY_MM_DD_HH_MM_SS_SSS
+YYYYMMDDHHMMSSSSS
+```
+
+---
+
+# Refactoring Rules
+
+1. Replace all hardcoded date/time format string literals with the appropriate constant.
+2. Do not limit replacements to duplicated literals reported by SonarQube.
+3. Reuse existing constants whenever possible.
+4. If a required format does not exist, add it to the appropriate class.
+5. Do not create duplicate constants.
+6. Preserve all existing behavior.
+7. Do not perform unrelated refactoring.
+
+---
+
+# Mapping Rules
+
+| Pattern | Class |
+|---------|-------|
+| `MM/dd/yyyy` | `DateFormatConstants` |
+| `yyyy-MM-dd` | `DateFormatConstants` |
+| `yyyyMMdd` | `DateFormatConstants` |
+| `HH:mm` | `TimeFormatConstants` |
+| `HH:mm:ss` | `TimeFormatConstants` |
+| `HH:mm:ss.SSS` | `TimeFormatConstants` |
+| `yyyy-MM-dd HH:mm:ss` | `DateTimeFormatConstants` |
+| `MM/dd/yyyy HH:mm` | `DateTimeFormatConstants` |
+| `yyyyMMddHHmmss` | `DateTimeFormatConstants` |
+| `yyyy-MM-dd HH:mm:ss.SSS` | `TimestampFormatConstants` |
+
+---
+
+# Scope
+
+Apply to:
+
+- `SimpleDateFormat`
+- `DateTimeFormatter`
+- `FastDateFormat`
+- Date parsing
+- Date formatting
+- Timestamp formatting
+- Utility classes
+- Controllers
+- Services
+- DAOs
+- JSPs
+- Unit tests (unless the format string itself is the subject of the test)
+
+---
+
+# Golden Rules
+
+1. Follow the **Single Responsibility Principle**.
+2. Each constants class must contain only one category of format patterns.
+3. Reuse existing constants before creating new ones.
+4. Replace all hardcoded format strings with the corresponding constants.
+5. Preserve 100% functional equivalence.
+6. Keep changes minimal and consistent with the project's coding standards.
