@@ -1,0 +1,138 @@
+# Refactor Spring Beans to Use Constructor Injection with Testability in Mind
+
+I need to refactor a Spring Boot 3.x application (JDK 21) to comply with the following SonarQube rule:
+
+> Instance fields are not allowed in Spring Bean classes unless annotated with @Autowired, @SingletonVariable, or declared as final; use constructor injection instead.
+
+## Primary Goals
+
+- Resolve all SonarQube violations.
+- Improve testability.
+- Preserve existing behavior.
+- Follow Spring Boot and JDK 21 best practices.
+
+## Refactoring Requirements
+
+For every Spring-managed bean (`@Controller`, `@Service`, `@Component`, `@Repository`, `@Configuration`, `@ControllerAdvice`, etc.):
+
+1. Replace field injection with constructor injection.
+2. Declare all injected dependencies as `private final`.
+3. Remove `@Autowired` from fields.
+4. Use a single constructor (omit `@Autowired` if only one constructor exists).
+5. Do not modify business logic.
+6. Do not change public APIs or request mappings.
+7. Preserve existing functionality.
+
+## Testability Requirements
+
+The refactored code must be easy to unit test.
+
+Specifically:
+
+- Every dependency must be injected through the constructor.
+- No hidden dependencies.
+- No static mutable state.
+- No field injection.
+- Dependencies should be mockable using Mockito.
+- Classes should be instantiable directly in unit tests without requiring the Spring container.
+- Prefer immutable design by making injected dependencies `final`.
+- Keep methods cohesive and follow the Single Responsibility Principle.
+
+Example:
+
+### Before
+
+```java
+@Controller
+public class AgentController {
+
+    @Autowired
+    private AgentService agentService;
+
+    @Autowired
+    private AuditService auditService;
+
+    public String search() {
+        ...
+    }
+}
+```
+
+### After
+
+```java
+@Controller
+public class AgentController {
+
+    private final AgentService agentService;
+    private final AuditService auditService;
+
+    public AgentController(
+            AgentService agentService,
+            AuditService auditService) {
+        this.agentService = agentService;
+        this.auditService = auditService;
+    }
+
+    public String search() {
+        ...
+    }
+}
+```
+
+The refactored class should be directly testable:
+
+```java
+@ExtendWith(MockitoExtension.class)
+class AgentControllerTest {
+
+    @Mock
+    private AgentService agentService;
+
+    @Mock
+    private AuditService auditService;
+
+    @InjectMocks
+    private AgentController controller;
+
+    @Test
+    void shouldSearchSuccessfully() {
+        ...
+    }
+}
+```
+
+## Special Cases
+
+Handle correctly:
+
+- `@Qualifier`
+- `@Lazy`
+- `ObjectProvider`
+- `Provider`
+- Optional dependencies
+- Collection injection (`List`, `Set`, `Map`)
+- Multiple constructors
+- Circular dependencies (identify and explain rather than hiding them)
+
+## Code Quality Expectations
+
+Ensure the resulting code:
+
+- Compiles successfully.
+- Passes existing tests.
+- Improves maintainability.
+- Improves testability.
+- Follows SOLID principles.
+- Uses constructor injection consistently.
+- Is compatible with Spring Boot 3.x and JDK 21.
+- Satisfies the SonarQube rule without suppressing warnings.
+
+## Output
+
+For each refactored class:
+
+1. Explain the changes made.
+2. Show the complete updated class.
+3. Explain how the changes improve testability.
+4. Identify any potential design issues discovered during refactoring (e.g., circular dependencies or too many constructor parameters) and suggest improvements without changing behavior.
