@@ -1,0 +1,381 @@
+# Add Kubernetes Health Probes to the Java Application
+
+You are a senior Java platform engineer responsible for making the application production-ready for Kubernetes deployments.
+
+## Objective
+
+Implement proper Kubernetes health probes by exposing dedicated HTTP endpoints for:
+
+- Liveness Probe
+- Readiness Probe
+- Startup Probe
+
+The implementation must follow Kubernetes best practices and integrate with the existing application architecture.
+
+The generated code must remain **100% functionally equivalent**.
+
+---
+
+# Requirements
+
+Implement the following endpoints.
+
+## Startup Probe
+
+```
+GET /health/startup
+```
+
+Purpose
+
+- Indicates whether the application has finished starting.
+- Returns success only after the application has completed initialization.
+- Used only during startup.
+
+Response
+
+```
+HTTP 200
+```
+
+when startup is complete.
+
+Otherwise
+
+```
+HTTP 503
+```
+
+---
+
+## Readiness Probe
+
+```
+GET /health/ready
+```
+
+Purpose
+
+Determines whether the application is ready to receive traffic.
+
+The endpoint should verify all required dependencies are available.
+
+Examples
+
+- Database connectivity
+- Connection pool availability
+- Message queue (if used)
+- Cache (Redis, Hazelcast, etc.)
+- External dependencies that are mandatory for serving requests
+
+Return
+
+```
+HTTP 200
+```
+
+when the application is ready.
+
+Otherwise
+
+```
+HTTP 503
+```
+
+---
+
+## Liveness Probe
+
+```
+GET /health/live
+```
+
+Purpose
+
+Determines whether the JVM is alive.
+
+This endpoint should **not** perform expensive dependency checks.
+
+It should verify only that the application process is still healthy.
+
+Examples
+
+- JVM is running
+- Application thread pool is not deadlocked (if available)
+- Basic internal health
+
+Return
+
+```
+HTTP 200
+```
+
+unless the process should be restarted.
+
+Never fail because of temporary database or downstream service outages.
+
+---
+
+# Existing Framework
+
+Detect the existing framework and integrate accordingly.
+
+Support
+
+- Spring Boot
+- Spring MVC
+- Struts
+- Servlet-based applications
+
+Follow the project's existing architecture.
+
+Do not introduce unnecessary frameworks.
+
+---
+
+# Health Check Design
+
+Separate responsibilities.
+
+```
+HealthController
+
+    GET /health/live
+
+    GET /health/ready
+
+    GET /health/startup
+```
+
+Delegate logic into services when appropriate.
+
+Example
+
+```
+HealthService
+
+StartupHealthService
+
+ReadinessHealthService
+
+LivenessHealthService
+```
+
+Avoid placing health logic directly in controllers.
+
+---
+
+# Readiness Checks
+
+Only include dependencies required for serving requests.
+
+Possible checks
+
+- Database connection
+- Connection pool
+- Cache
+- JMS
+- Kafka
+- RabbitMQ
+- Required REST clients
+- Required SOAP clients
+
+Do not fail readiness because of optional services.
+
+---
+
+# Startup Checks
+
+Startup should become healthy only after
+
+- Spring Context initialized
+- Struts initialized
+- Servlet initialization completed
+- Database pool initialized
+- Required caches loaded
+- Required application initialization completed
+
+---
+
+# Liveness Checks
+
+Keep lightweight.
+
+Do NOT
+
+- Query database
+- Call external APIs
+- Perform slow operations
+
+---
+
+# HTTP Responses
+
+Healthy
+
+```
+HTTP 200
+```
+
+Unhealthy
+
+```
+HTTP 503 Service Unavailable
+```
+
+Response body should be JSON.
+
+Example
+
+```json
+{
+  "status": "UP"
+}
+```
+
+or
+
+```json
+{
+  "status": "DOWN",
+  "reason": "Database unavailable"
+}
+```
+
+---
+
+# Logging
+
+Do not log every successful probe.
+
+Log only
+
+- startup failures
+- readiness failures
+- unexpected exceptions
+
+Avoid excessive log noise.
+
+---
+
+# Performance
+
+Health endpoints should respond quickly.
+
+Avoid
+
+- expensive SQL
+- full table scans
+- unnecessary remote calls
+
+---
+
+# Security
+
+Health endpoints should not expose sensitive information.
+
+Do not expose
+
+- passwords
+- connection strings
+- stack traces
+- internal implementation details
+
+Return only necessary health information.
+
+---
+
+# Kubernetes Configuration
+
+Verify compatibility with the following probe configuration.
+
+```yaml
+startupProbe:
+  httpGet:
+    path: /health/startup
+    port: 8080
+  periodSeconds: 5
+  timeoutSeconds: 1
+  failureThreshold: 30
+
+readinessProbe:
+  httpGet:
+    path: /health/ready
+    port: 8080
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 1
+  failureThreshold: 3
+  successThreshold: 1
+
+livenessProbe:
+  httpGet:
+    path: /health/live
+    port: 8080
+  initialDelaySeconds: 15
+  periodSeconds: 10
+  timeoutSeconds: 1
+  failureThreshold: 3
+```
+
+Ensure the application behaves correctly with these settings.
+
+---
+
+# Preserve Behaviour
+
+Do not modify
+
+- Business logic
+- Controllers
+- Services
+- DAOs
+- Security
+- Existing APIs
+- Existing routing
+
+Only add health probe support.
+
+---
+
+# Validation
+
+Verify
+
+- Startup endpoint works correctly.
+- Readiness endpoint correctly reflects application readiness.
+- Liveness endpoint detects only JVM/process health.
+- Responses are HTTP 200 or HTTP 503 as appropriate.
+- Health endpoints are lightweight.
+- No existing functionality is affected.
+
+---
+
+# Output Requirements
+
+Provide
+
+1. Files created.
+2. Files modified.
+3. Health endpoints added.
+4. Readiness checks implemented.
+5. Startup checks implemented.
+6. Liveness checks implemented.
+7. Any assumptions made.
+8. Confirmation that:
+   - application functionality is unchanged
+   - existing APIs are unchanged
+   - only Kubernetes health probe support was added
+
+---
+
+# Golden Rules
+
+1. Separate liveness, readiness, and startup responsibilities.
+2. Liveness must not depend on external services.
+3. Readiness should verify only required dependencies.
+4. Startup should report healthy only after initialization completes.
+5. Health endpoints must be lightweight and secure.
+6. Return HTTP 200 when healthy and HTTP 503 when unhealthy.
+7. Preserve 100% functional equivalence.
+8. Follow the project's existing architecture and coding standards.

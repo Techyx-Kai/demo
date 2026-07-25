@@ -1,0 +1,332 @@
+# Implement Health Ping APIs
+
+You are a senior Java backend engineer responsible for implementing production-ready health endpoints for a Kubernetes-deployed Java application.
+
+## Objective
+
+Implement two HTTP endpoints:
+
+```
+GET /health/ping/short
+GET /health/ping/long
+```
+
+The implementation must follow the project's existing architecture and preserve all existing functionality.
+
+---
+
+# Endpoint Responsibilities
+
+## Short Health Check
+
+Endpoint
+
+```
+GET /health/ping/short
+```
+
+Purpose
+
+Lightweight application health check.
+
+This endpoint verifies only that the application itself is alive and responding.
+
+It must NOT
+
+- query the database
+- call downstream services
+- execute long-running SQL
+- perform expensive operations
+
+It simply confirms the application process is healthy.
+
+Return
+
+```
+HTTP 200
+```
+
+Example response
+
+```json
+{
+    "data": [
+        {
+            "service": "Application",
+            "status": "OK",
+            "description": ""
+        }
+    ]
+}
+```
+
+---
+
+## Long Health Check
+
+Endpoint
+
+```
+GET /health/ping/long
+```
+
+Purpose
+
+Comprehensive health check.
+
+This endpoint verifies
+
+- Application
+- IaaS Database connectivity
+
+The database check should be lightweight.
+
+Examples
+
+- SELECT 1
+- Connection validation
+- Connection pool validation
+
+Avoid expensive SQL.
+
+---
+
+# HTTP Response Codes
+
+## Healthy
+
+Return
+
+```
+HTTP 200 OK
+```
+
+Example
+
+```json
+{
+    "data": [
+        {
+            "service": "Application",
+            "status": "OK",
+            "description": ""
+        },
+        {
+            "service": "IaaS Database",
+            "status": "OK",
+            "description": ""
+        }
+    ]
+}
+```
+
+---
+
+## Partial Failure
+
+If the application is running but the database is unavailable
+
+Return
+
+```
+HTTP 206 Partial Content
+```
+
+Example
+
+```json
+{
+    "data": [
+        {
+            "service": "Application",
+            "status": "OK",
+            "description": ""
+        },
+        {
+            "service": "IaaS Database",
+            "status": "FAILED",
+            "description": "Database connection unavailable"
+        }
+    ]
+}
+```
+
+---
+
+## Application Failure
+
+If the application cannot serve requests
+
+Return
+
+```
+HTTP 503 Service Unavailable
+```
+
+---
+
+# Design
+
+Create
+
+```
+HealthController
+
+HealthService
+
+ApplicationHealthChecker
+
+DatabaseHealthChecker
+```
+
+Separate responsibilities.
+
+Controller
+
+- HTTP endpoints only
+
+HealthService
+
+- Coordinates checks
+
+ApplicationHealthChecker
+
+- Checks local application health
+
+DatabaseHealthChecker
+
+- Checks IaaS DB connectivity
+
+---
+
+# Database Check
+
+Use the project's existing
+
+- DataSource
+- JdbcTemplate
+- EntityManager
+- Connection Pool
+
+Do not create a new database connection mechanism.
+
+Prefer
+
+```
+Connection.isValid(...)
+```
+
+or
+
+```
+SELECT 1
+```
+
+depending on the existing project architecture.
+
+---
+
+# Performance
+
+The short endpoint must complete within milliseconds.
+
+The long endpoint should be lightweight and avoid unnecessary database load.
+
+---
+
+# Logging
+
+Do not log successful health checks.
+
+Only log
+
+- database failures
+- unexpected exceptions
+
+---
+
+# Security
+
+Do not expose
+
+- SQL
+- stack traces
+- connection URLs
+- usernames
+- passwords
+
+Descriptions should contain only high-level error messages.
+
+---
+
+# Kubernetes Integration
+
+The APIs should support the following probe configuration.
+
+Liveness
+
+```
+/health/ping/short
+```
+
+Readiness
+
+```
+/health/ping/long
+```
+
+The endpoints should be suitable for Kubernetes health probes.
+
+---
+
+# Preserve Behaviour
+
+Do not modify
+
+- business logic
+- controllers
+- services
+- DAOs
+- existing APIs
+
+Only add the health endpoints.
+
+---
+
+# Validation
+
+Verify
+
+- Short endpoint performs no database access.
+- Long endpoint verifies the IaaS Database.
+- HTTP 200 is returned when all checks pass.
+- HTTP 206 is returned when only the downstream dependency fails.
+- HTTP 503 is returned only when the application itself is unhealthy.
+- Existing functionality is unchanged.
+
+---
+
+# Output Requirements
+
+Provide
+
+1. Files created.
+2. Files modified.
+3. New endpoints.
+4. Database health check implementation.
+5. HTTP response mapping.
+6. Confirmation that:
+   - application functionality is unchanged
+   - only health endpoints were added
+
+---
+
+# Golden Rules
+
+1. `/health/ping/short` checks only the local application.
+2. `/health/ping/long` checks the local application and the IaaS Database.
+3. Use the existing DataSource or connection pool.
+4. Keep health checks lightweight.
+5. Do not expose sensitive information.
+6. Preserve 100% functional equivalence.
+7. Follow the project's existing architecture and coding standards.
