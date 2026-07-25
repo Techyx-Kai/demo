@@ -1,0 +1,344 @@
+# CCSConstant Refactoring Prompt
+
+You are a senior Java engineer responsible for refactoring legacy constant usage to the project's new enum-based architecture while preserving existing functionality and behavior.
+
+## Objective
+
+Refactor all usages of the deprecated `CCSConstant` class to use the appropriate enum modules.
+
+This is a **project-wide standardization refactoring**, not just a SonarQube fix.
+
+The generated code must remain **100% functionally equivalent**.
+
+---
+
+# Primary Rules
+
+## 1. Remove Dependency on CCSConstant
+
+Replace every reference to `CCSConstant` with the appropriate enum.
+
+Do **not** introduce new usages of `CCSConstant`.
+
+If a value still exists only in `CCSConstant`, migrate it into the appropriate enum before replacing its usages.
+
+---
+
+# Mapping Rules
+
+## Session Attributes
+
+Any constant matching:
+
+```
+ATTR_*
+```
+
+Example
+
+```java
+CCSConstant.ATTR_USER_ID
+CCSConstant.ATTR_AUTH_LVL
+CCSConstant.ATTR_LOCATION
+CCSConstant.ATTR_MESSAGES
+```
+
+must become
+
+```java
+SessionAttributeKey.USER_ID
+SessionAttributeKey.AUTH_LVL
+SessionAttributeKey.LOCATION
+SessionAttributeKey.MESSAGES
+```
+
+Module
+
+```
+enums/web/SessionAttributeKey
+```
+
+This also applies to hardcoded string literals representing session/request attributes.
+
+Examples
+
+```java
+session.getAttribute("ccsUserId")
+request.setAttribute("ccsMessages")
+```
+
+should become
+
+```java
+session.getAttribute(SessionAttributeKey.USER_ID)
+request.setAttribute(SessionAttributeKey.MESSAGES)
+```
+
+---
+
+## Forward Mappings
+
+Any constant matching
+
+```
+FORWARD_*
+```
+
+must use
+
+```
+enums/web/ForwardMapping
+```
+
+Examples
+
+```java
+CCSConstant.FORWARD_LOGIN
+CCSConstant.FORWARD_SUCCESS
+CCSConstant.FORWARD_EXPORT
+```
+
+becomes
+
+```java
+ForwardMapping.LOGIN
+ForwardMapping.SUCCESS
+ForwardMapping.EXPORT
+```
+
+Also replace matching hardcoded literals.
+
+Examples
+
+```java
+return mapping.findForward("success");
+return mapping.findForward("login");
+```
+
+becomes
+
+```java
+return mapping.findForward(ForwardMapping.SUCCESS);
+return mapping.findForward(ForwardMapping.LOGIN);
+```
+
+---
+
+## DCA Constants
+
+Any constant matching
+
+```
+DCA_*
+```
+
+must use
+
+```
+enums/DcaEnums
+```
+
+Examples
+
+```java
+CCSConstant.DCA_RTB
+CCSConstant.DCA_ACTION_DAPP
+```
+
+becomes
+
+```java
+DcaEnums.RTB
+DcaEnums.ACTION_DAPP
+```
+
+Also replace matching string literals.
+
+---
+
+## Action Errors
+
+Any constant matching
+
+```
+ERROR_*
+GLOBAL_ACT_ERR_*
+```
+
+must use
+
+```
+enums/web/ActionErrorKey
+```
+
+Examples
+
+```java
+CCSConstant.ERROR_PERMISSION
+CCSConstant.GLOBAL_ACT_ERR_NO_PERMISSION
+CCSConstant.GLOBAL_ACT_ERR_NO_RECORD
+```
+
+becomes
+
+```java
+ActionErrorKey.PERMISSION
+ActionErrorKey.GLOBAL_NO_PERMISSION
+ActionErrorKey.GLOBAL_NO_RECORD
+```
+
+Also replace matching hardcoded literals.
+
+Examples
+
+```java
+errors.add("global.error.nopermissions");
+```
+
+becomes
+
+```java
+errors.add(ActionErrorKey.GLOBAL_NO_PERMISSION);
+```
+
+---
+
+# String Literal Standardization
+
+Do **not** only replace references to `CCSConstant`.
+
+Also replace matching hardcoded string literals throughout the project.
+
+Examples
+
+Instead of
+
+```java
+session.setAttribute("ccsUserId", userId);
+```
+
+use
+
+```java
+session.setAttribute(SessionAttributeKey.USER_ID, userId);
+```
+
+Instead of
+
+```java
+mapping.findForward("success");
+```
+
+use
+
+```java
+mapping.findForward(ForwardMapping.SUCCESS);
+```
+
+Instead of
+
+```java
+rs.getString("USER_ID");
+```
+
+use the project's database enum if applicable.
+
+Always standardize to the project's enum architecture.
+
+---
+
+# Search Before Creating
+
+Before adding any enum value:
+
+1. Search the destination enum.
+2. Reuse existing values.
+3. Only add missing values.
+
+Never duplicate constants.
+
+---
+
+# Preserve Behaviour
+
+Do NOT change
+
+- business logic
+- execution flow
+- method signatures
+- return values
+- exception handling
+- transactions
+- Spring behavior
+- Struts behavior
+- Hibernate behavior
+
+The refactoring must only replace constant references.
+
+---
+
+# Minimize Changes
+
+Only perform changes necessary for the migration.
+
+Avoid
+
+- renaming variables
+- reformatting files
+- moving methods
+- restructuring classes
+- unrelated cleanup
+
+---
+
+# Project Standards
+
+Follow existing
+
+- package structure
+- enum naming
+- import ordering
+- formatting
+- architecture
+
+Remove unused `CCSConstant` imports after migration.
+
+---
+
+# Validation
+
+After refactoring, verify:
+
+- No remaining `CCSConstant` references.
+- No remaining hardcoded literals that belong to the migrated enums.
+- No duplicate enum values were introduced.
+- Existing enums were reused whenever possible.
+- No functional changes were made.
+
+---
+
+# Output Requirements
+
+Provide:
+
+1. Files modified.
+2. `CCSConstant` members replaced.
+3. Hardcoded string literals standardized.
+4. New enum values added (if any).
+5. Unused imports removed.
+6. Confirmation that:
+   - functionality is unchanged
+   - behavior is unchanged
+   - API is unchanged
+   - only constant standardization was performed
+
+---
+
+# Golden Rules
+
+1. `CCSConstant` is deprecated and must not be used.
+2. The new enum modules are the single source of truth.
+3. Replace both `CCSConstant` references and equivalent hardcoded string literals.
+4. Reuse existing enum values before creating new ones.
+5. Preserve 100% functional equivalence.
+6. Make the smallest possible code changes while fully complying with the project's enum architecture.
