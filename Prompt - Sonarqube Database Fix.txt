@@ -1,0 +1,148 @@
+# Standardize DAO Database Field References
+
+You are a senior Java engineer responsible for enforcing the project's coding standards.
+
+## Objective
+
+Standardize all database field references in DAO/JDBC code to use the project's `DatabaseFields` enum.
+
+This is a coding standard refactoring, not just a SonarQube fix.
+
+---
+
+## Coding Standard
+
+Any database field name used in DAO or JDBC code must reference `DatabaseFields` instead of hardcoded string literals.
+
+This applies regardless of whether the literal is duplicated.
+
+Examples include:
+
+- `ResultSet`
+- `ResultSetMetaData`
+- `RowMapper`
+- `JdbcTemplate`
+- `CallableStatement`
+- `PreparedStatement`
+- `SqlRowSet`
+- Any JDBC API that accesses a column by name
+
+### Before
+
+```java
+rs.getString("USER_ID");
+rs.getInt("STATUS");
+rs.getTimestamp("CREATE_DATE");
+rs.findColumn("AGENT_CODE");
+```
+
+### After
+
+```java
+rs.getString(DatabaseFields.USER_ID);
+rs.getInt(DatabaseFields.STATUS);
+rs.getTimestamp(DatabaseFields.CREATE_DATE);
+rs.findColumn(DatabaseFields.AGENT_CODE);
+```
+
+---
+
+## Rules
+
+### 1. Replace ALL database field literals
+
+Replace every database field string literal with the corresponding `DatabaseFields` constant.
+
+Do **not** limit the changes to duplicated literals reported by SonarQube.
+
+---
+
+### 2. Reuse Existing Constants
+
+Before creating a new constant:
+
+- Search the existing `DatabaseFields` enum.
+- Reuse existing constants whenever available.
+
+---
+
+### 3. Add Missing Constants
+
+If a database field does not exist in `DatabaseFields`:
+
+- Add it following the project's naming conventions.
+- Do not create another constants class or enum.
+
+---
+
+### 4. Preserve SQL
+
+Do **not** modify:
+
+- SQL statements
+- SQL logic
+- WHERE clauses
+- JOINs
+- ORDER BY
+- GROUP BY
+- aliases
+- table names
+
+Only replace Java string literals used to retrieve values from query results.
+
+---
+
+### 5. Preserve Behavior
+
+Do not change:
+
+- DAO logic
+- ResultSet mapping
+- business logic
+- null handling
+- exception handling
+- performance
+
+The generated code must remain functionally identical.
+
+---
+
+### 6. Minimize Changes
+
+Only make changes required to standardize database field references.
+
+Avoid unrelated refactoring.
+
+---
+
+### 7. Follow Project Standards
+
+- Preserve formatting.
+- Preserve naming conventions.
+- Preserve package structure.
+- Preserve imports.
+- Follow existing coding style.
+
+---
+
+## Output
+
+Provide:
+
+1. The refactored DAO code.
+2. Any new constants added to `DatabaseFields`.
+3. A summary of all replacements made.
+4. Confirmation that:
+   - all DAO database field references now use `DatabaseFields`
+   - no SQL was modified
+   - no business logic changed
+   - no ResultSet mapping changed
+   - only coding-standard refactoring was performed
+
+---
+
+# Golden Rule
+
+`DatabaseFields` is the single source of truth for all database field names used in DAO/JDBC code.
+
+Never leave hardcoded database field names in DAO classes, even if they appear only once.

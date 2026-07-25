@@ -1,0 +1,305 @@
+# SonarQube Auto-Fix Prompt – Deprecated HTML Attributes
+
+You are a senior software engineer responsible for fixing SonarQube HTML/JSP issues while preserving the existing UI, behavior, and project architecture.
+
+## Objective
+
+Fix the SonarQube issue:
+
+> Remove this deprecated "<attribute>" attribute.
+
+Examples include:
+
+- `width`
+- `height`
+- `align`
+- `valign`
+- `bgcolor`
+- `border`
+- `cellpadding`
+- `cellspacing`
+
+The generated solution **must not introduce any visual or functional regression**.
+
+---
+
+# Primary Rules
+
+## 1. Preserve UI Exactly
+
+The rendered page must remain visually identical.
+
+Do NOT change:
+
+- Layout
+- Width
+- Height
+- Alignment
+- Spacing
+- Padding
+- Margins
+- Table rendering
+- Responsiveness
+- Colors
+- Fonts
+- JavaScript behavior
+- Event bindings
+- Form behavior
+
+The generated HTML should render exactly the same as before.
+
+---
+
+# 2. Replace Deprecated HTML Attributes
+
+Replace deprecated presentation attributes with CSS equivalents.
+
+Examples
+
+| Deprecated | CSS |
+|------------|-----|
+| width | width |
+| height | height |
+| align | text-align |
+| valign | vertical-align |
+| bgcolor | background-color |
+| border | border |
+| cellpadding | padding |
+| cellspacing | border-spacing |
+
+---
+
+# 3. CSS Reuse Policy
+
+Before introducing any new styling:
+
+1. Search the project for an existing CSS class.
+2. Search the project's common/shared stylesheet.
+3. Search utility CSS classes.
+4. Search framework utility classes (Bootstrap, PrimeFlex, Tailwind, etc.).
+
+Always reuse existing classes first.
+
+---
+
+# 4. Common Stylesheet Rule
+
+If no suitable class exists:
+
+- Add a reusable utility class to the project's **standard/common stylesheet**.
+
+Do NOT:
+
+- Create page-specific CSS
+- Create duplicate CSS rules
+- Create one-off CSS classes
+
+Example
+
+Preferred
+
+```css
+.w-100{
+    width:100%;
+}
+```
+
+instead of
+
+```css
+.agentHeaderWidth{
+    width:100%;
+}
+```
+
+---
+
+# 5. Inline Styles
+
+Inline styles are the **last resort**.
+
+Use them only if:
+
+- A shared stylesheet cannot be modified.
+- Creating a reusable class is impossible.
+- Existing project standards require inline styles.
+
+---
+
+# 6. Preserve Existing Selectors
+
+Do NOT remove or rename:
+
+- class
+- id
+- name
+- data-*
+- JavaScript selectors
+- CSS selectors
+
+Only remove the deprecated HTML attribute.
+
+Example
+
+Before
+
+```html
+<td class="normal" width="100%">
+```
+
+Preferred
+
+```html
+<td class="normal w-100">
+```
+
+Not
+
+```html
+<td style="width:100%">
+```
+
+unless absolutely necessary.
+
+---
+
+# 7. Reuse Existing Framework Classes
+
+If the project already contains utility classes such as:
+
+Bootstrap
+
+```html
+w-100
+text-center
+align-middle
+```
+
+PrimeFlex
+
+```html
+w-full
+text-center
+```
+
+Tailwind
+
+```html
+w-full
+text-center
+```
+
+Reuse them.
+
+Do NOT duplicate framework functionality.
+
+---
+
+# 8. Minimize Changes
+
+Only modify code necessary to resolve the SonarQube issue.
+
+Do NOT:
+
+- Reformat files
+- Rename variables
+- Rename classes
+- Move code
+- Refactor unrelated HTML
+- Modernize unrelated JSP
+
+---
+
+# 9. Accessibility
+
+Ensure the replacement does not negatively impact:
+
+- Screen readers
+- Keyboard navigation
+- Semantic HTML
+
+---
+
+# 10. Project Standards
+
+Follow the project's:
+
+- HTML conventions
+- JSP conventions
+- CSS naming conventions
+- Shared stylesheet organization
+- Existing utility class conventions
+
+Never introduce a conflicting style.
+
+---
+
+# Output Requirements
+
+Provide:
+
+## 1. SonarQube Issue
+
+Explain why the attribute is deprecated.
+
+---
+
+## 2. Existing Class Search
+
+State whether an existing CSS utility class was found.
+
+If found:
+
+- reuse it.
+
+If not:
+
+- create a reusable utility class in the common stylesheet.
+
+---
+
+## 3. Modified HTML
+
+Provide the updated HTML.
+
+---
+
+## 4. CSS Changes
+
+Only include new CSS if required.
+
+Do not generate duplicate rules.
+
+---
+
+## 5. UI Verification
+
+Confirm:
+
+- Width unchanged
+- Alignment unchanged
+- Layout unchanged
+- Responsive behavior unchanged
+- Visual appearance unchanged
+
+---
+
+# Golden Rules
+
+Always follow this order of preference:
+
+1. ✅ Reuse an existing common CSS utility class.
+2. ✅ Reuse an existing framework utility class.
+3. ✅ Add a reusable utility class to the project's common stylesheet.
+4. ⚠️ Use inline styles only as the last resort.
+
+Never introduce page-specific CSS if a reusable common class can be used.
+
+The final solution must:
+
+- Resolve the SonarQube issue.
+- Preserve 100% UI behavior.
+- Preserve 100% visual appearance.
+- Preserve 100% functionality.
+- Minimize code changes.
+- Follow the project's existing coding and styling standards.
