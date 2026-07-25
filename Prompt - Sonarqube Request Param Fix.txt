@@ -1,0 +1,240 @@
+# Standardize HTTP Request Parameter Keys
+
+You are a senior Java web engineer responsible for enforcing the project's coding standards.
+
+## Objective
+
+Standardize all HTTP request parameter names by replacing hardcoded string literals used in request parameter lookups with the appropriate enum under:
+
+```
+enums/web/RequestParamKey
+```
+
+This is a **project-wide coding standard refactoring**, not just a SonarQube duplicate literal fix.
+
+The generated code must remain **100% functionally equivalent**.
+
+---
+
+# Single Responsibility Principle
+
+Do **not** create generic constants classes.
+
+HTTP request parameter names belong exclusively in:
+
+```
+enums/web/RequestParamKey
+```
+
+This enum is the single source of truth for all request parameter keys.
+
+---
+
+# Scope
+
+Apply to all request parameter access, including but not limited to:
+
+- `HttpServletRequest`
+- Spring MVC
+- Struts
+- Servlets
+- Filters
+- Multipart requests
+- Utility methods wrapping `HttpServletRequest`
+
+Examples:
+
+```java
+request.getParameter(...)
+request.getParameterValues(...)
+request.getParameterMap()
+request.getParameterNames()
+request.getParameter(...)
+```
+
+Also replace parameter names passed into helper methods that ultimately retrieve request parameters.
+
+---
+
+# Replace ALL Hardcoded Parameter Names
+
+Replace every hardcoded request parameter name.
+
+Do **not** limit replacements to duplicated literals reported by SonarQube.
+
+Examples
+
+Before
+
+```java
+request.getParameter("assignNo");
+```
+
+After
+
+```java
+request.getParameter(RequestParamKey.ASSIGN_NO.getKey());
+```
+
+---
+
+Before
+
+```java
+request.getParameter("assignDate");
+```
+
+After
+
+```java
+request.getParameter(RequestParamKey.ASSIGN_DATE.getKey());
+```
+
+---
+
+Before
+
+```java
+request.getParameter("basicChanged");
+```
+
+After
+
+```java
+request.getParameter(RequestParamKey.BASIC_CHANGED.getKey());
+```
+
+---
+
+# Dynamic Parameter Names
+
+When parameter names are dynamically constructed, replace only the literal portion.
+
+Before
+
+```java
+request.getParameter("assignNo" + i);
+```
+
+After
+
+```java
+request.getParameter(RequestParamKey.ASSIGN_NO.getKey() + i);
+```
+
+---
+
+Before
+
+```java
+request.getParameter("dca" + index);
+```
+
+After
+
+```java
+request.getParameter(RequestParamKey.DCA.getKey() + index);
+```
+
+Do not create separate enum values for indexed or concatenated parameter names.
+
+---
+
+# Search Before Creating
+
+Before adding a new enum value:
+
+1. Search `RequestParamKey`.
+2. Reuse existing enum values whenever possible.
+3. Only add missing values.
+
+Never introduce duplicate enum values.
+
+---
+
+# Enum Responsibilities
+
+`RequestParamKey` must contain only HTTP request parameter names.
+
+Examples
+
+```java
+ASSIGN_NO("assignNo")
+ASSIGN_DATE("assignDate")
+ASSIGN_NT("assignNt")
+BASIC_CHANGED("basicChanged")
+DCA("dca")
+USER_ID("userId")
+ROW_NO("rowNo")
+ACTION("action")
+PAGE("page")
+SORT("sort")
+```
+
+Expose
+
+```java
+getKey()
+```
+
+---
+
+# Preserve Behaviour
+
+Do not change:
+
+- Controller logic
+- Service logic
+- DAO logic
+- Validation logic
+- Business rules
+- Navigation
+- Request processing
+- Parameter values
+- Parameter concatenation
+- Framework behavior
+
+Only replace hardcoded request parameter names.
+
+---
+
+# Validation
+
+Verify:
+
+- No remaining hardcoded request parameter names.
+- Existing enum values were reused whenever possible.
+- No duplicate enum values were introduced.
+- Dynamic parameter construction still behaves identically.
+- Request processing is unchanged.
+- Application behavior is unchanged.
+
+---
+
+# Output Requirements
+
+Provide:
+
+1. Files modified.
+2. Existing enum values reused.
+3. New enum values added.
+4. Remaining dynamic parameter usages.
+5. Unused imports removed.
+6. Confirmation that:
+
+- functionality is unchanged
+- request handling is unchanged
+- parameter names are unchanged
+- only request parameter key standardization was performed
+
+---
+
+# Golden Rules
+
+1. `RequestParamKey` is the single source of truth for HTTP request parameter names.
+2. Replace **all** hardcoded request parameter names, not only SonarQube duplicate literals.
+3. Reuse existing enum values before creating new ones.
+4. For dynamically constructed parameter names, replace only the literal prefix or suffix with the enum value.
+5. Do not create generic constants classes.
+6. Preserve 100% functional equivalence.
+7. Keep changes minimal and follow the project's existing architecture and coding standards.

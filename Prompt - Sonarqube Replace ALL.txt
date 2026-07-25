@@ -1,0 +1,226 @@
+# Standardize Literal String Replacement
+
+You are a senior Java engineer responsible for improving code quality while preserving existing functionality.
+
+## Objective
+
+Replace calls to `String.replaceAll()` with `String.replace()` whenever the pattern being replaced is a **literal string** and does not require regular expression (regex) processing.
+
+This is a project-wide code quality refactoring and is **not** limited to SonarQube issues.
+
+The generated code must remain **100% functionally equivalent**.
+
+---
+
+# Scope
+
+Search the entire project for calls to:
+
+```java
+String.replaceAll(String regex, String replacement)
+```
+
+Identify cases where the first argument is a literal string or character and does not use any regex features.
+
+Examples include:
+
+```java
+","
+"-"
+"."
+"/"
+":"
+"_"
+" "
+"|"
+"("
+")"
+"["
+"]"
+"{"
+"}"
+```
+
+---
+
+# Replace with String.replace()
+
+If the first argument is a literal value, replace:
+
+Before
+
+```java
+text.replaceAll(",", "")
+```
+
+After
+
+```java
+text.replace(",", "")
+```
+
+---
+
+Before
+
+```java
+text.replaceAll("-", "")
+```
+
+After
+
+```java
+text.replace("-", "")
+```
+
+---
+
+Before
+
+```java
+text.replaceAll("/", "-")
+```
+
+After
+
+```java
+text.replace("/", "-")
+```
+
+---
+
+Before
+
+```java
+text.replaceAll(":", "")
+```
+
+After
+
+```java
+text.replace(":", "")
+```
+
+---
+
+# Do NOT Replace Genuine Regex
+
+Keep `replaceAll()` when the pattern uses regular expressions.
+
+Examples:
+
+```java
+replaceAll("\\s+", " ")
+replaceAll("[^0-9]", "")
+replaceAll("^0+", "")
+replaceAll(".*", "")
+replaceAll("\\d{4}", "####")
+replaceAll("[A-Za-z]", "")
+replaceAll("\\.", "")
+replaceAll("\\(", "")
+replaceAll("\\)", "")
+```
+
+These require regex processing and must remain unchanged.
+
+---
+
+# Validation Rules
+
+Before replacing `replaceAll()` with `replace()` verify that:
+
+- The search pattern is a literal string.
+- No regex metacharacters are intentionally used.
+- No regex character classes are used.
+- No quantifiers (`*`, `+`, `?`, `{}`) are used.
+- No anchors (`^`, `$`) are used.
+- No alternation (`|`) is used.
+- No escaped regex sequences (`\\d`, `\\s`, `\\w`, etc.) are used.
+- Behavior remains identical.
+
+If there is any uncertainty that the pattern is intended as a regex, **do not change it**.
+
+---
+
+# Preserve Behaviour
+
+Do not change:
+
+- Business logic
+- Validation logic
+- Parsing logic
+- Formatting logic
+- Exception handling
+- Method signatures
+
+Only replace `replaceAll()` with `replace()` where the behavior is guaranteed to be identical.
+
+---
+
+# Examples
+
+Before
+
+```java
+rawAmt.replaceAll(",", "").replaceAll("-", "");
+```
+
+After
+
+```java
+rawAmt.replace(",", "").replace("-", "");
+```
+
+---
+
+Before
+
+```java
+fileName.replaceAll(" ", "_");
+```
+
+After
+
+```java
+fileName.replace(" ", "_");
+```
+
+---
+
+Do NOT change
+
+```java
+value.replaceAll("[^0-9]", "");
+```
+
+---
+
+Do NOT change
+
+```java
+value.replaceAll("\\s+", " ");
+```
+
+---
+
+# Output Requirements
+
+Provide:
+
+1. Files modified.
+2. `replaceAll()` calls converted to `replace()`.
+3. `replaceAll()` calls intentionally left unchanged because they use regex.
+4. Confirmation that:
+   - functionality is unchanged
+   - behavior is unchanged
+   - only safe literal replacements were performed
+
+---
+
+# Golden Rules
+
+1. Use `String.replace()` for literal string replacements.
+2. Use `String.replaceAll()` only when regex functionality is required.
+3. Preserve 100% functional equivalence.
+4. If a pattern could be interpreted as an intentional regex, leave it unchanged.
+5. Make the smallest possible code changes while improving readability and performance.

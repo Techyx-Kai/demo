@@ -1,0 +1,374 @@
+# Standardize Duplicate JSP Views
+
+You are a senior Java web engineer responsible for removing duplicated JSP files while preserving application behavior, routing, and UI.
+
+## Objective
+
+Eliminate duplicated JSPs that exist under both:
+
+```
+WebContent/
+```
+
+and
+
+```
+WEB-INF/views/
+```
+
+The project is a **WAR-based web application**, therefore the expected canonical location is:
+
+```
+WEB-INF/views
+```
+
+However, **do not assume this is always correct**.
+
+If any code still references the JSP under `WebContent`, **do not automatically delete it**. Instead, identify and report the dependency so the developer can decide which copy is the true golden source.
+
+---
+
+# Source of Truth
+
+Expected canonical location:
+
+```
+WEB-INF/views
+```
+
+Priority:
+
+```
+WEB-INF/views
+    ↑
+WebContent
+```
+
+The JSP under `WEB-INF/views` should normally be preserved.
+
+---
+
+# Rules
+
+## 1. Detect Duplicate JSPs
+
+Search for duplicate JSPs located in both:
+
+```
+WebContent/...
+WEB-INF/views/...
+```
+
+---
+
+## 2. Compare Before Deleting
+
+Compare both JSPs completely.
+
+Verify:
+
+- JSP directives
+- JSTL
+- EL
+- Taglibs
+- Includes
+- JavaScript
+- CSS
+- HTML
+- Custom tags
+- Spring tags
+- Struts tags
+
+If differences exist:
+
+- Highlight every difference.
+- Recommend keeping the `WEB-INF/views` version.
+- Merge missing functionality if required.
+- Do not delete either file automatically.
+
+---
+
+## 3. Search All References
+
+Before deleting any JSP, perform a project-wide search.
+
+Search for references from:
+
+- Java classes
+- Controllers
+- Spring MVC
+- Struts Actions
+- Tiles definitions
+- `struts-config.xml`
+- `web.xml`
+- `RequestDispatcher`
+- `RequestDispatcher.forward`
+- `ServletContext`
+- `ServletRequest`
+- `forward()`
+- `sendRedirect()`
+- `ModelAndView`
+- ViewResolver
+- JSP includes
+- `<jsp:include>`
+- `<%@ include %>`
+- `<c:import>`
+- Hyperlinks
+- JavaScript navigation
+- AJAX endpoints
+- Configuration files
+- XML files
+- Properties files
+
+---
+
+## 4. Highlight WebContent References
+
+If **any** reference still points to:
+
+```
+WebContent/...
+```
+
+**DO NOT DELETE** the JSP.
+
+Instead produce a report.
+
+Example:
+
+```
+Duplicate JSP
+
+WebContent/customer/search.jsp
+WEB-INF/views/customer/search.jsp
+
+Found references:
+
+CustomerAction.java
+line 85
+
+return "/customer/search.jsp";
+
+CustomerController.java
+line 41
+
+RequestDispatcher.forward(
+    "/customer/search.jsp"
+);
+
+Recommendation:
+
+Developer review required.
+
+Possible golden copy:
+
+WEB-INF/views/customer/search.jsp
+```
+
+The developer will decide whether to:
+
+- update references
+- merge JSPs
+- keep both temporarily
+
+---
+
+## 5. Automatic Removal
+
+Automatically remove the JSP under `WebContent` only when ALL of the following are true:
+
+✔ Contents are identical (or functionally equivalent)
+
+✔ No remaining references exist
+
+✔ No includes reference it
+
+✔ No controller forwards reference it
+
+✔ No configuration references it
+
+✔ `WEB-INF/views` contains the complete implementation
+
+---
+
+## 6. Update References
+
+If the developer confirms that
+
+```
+WEB-INF/views
+```
+
+is the golden copy,
+
+update all references accordingly.
+
+Examples:
+
+Before
+
+```java
+return "/customer/search.jsp";
+```
+
+↓
+
+```java
+return "customer/search";
+```
+
+or
+
+```java
+return "customer/search";
+```
+
+depending on the project's ViewResolver.
+
+Do not change routing semantics.
+
+---
+
+## 7. Preserve Behaviour
+
+Do not change
+
+- URLs
+- Controller logic
+- Business logic
+- Navigation
+- ViewResolver
+- Struts mappings
+- Tiles definitions
+- Includes
+- JavaScript
+
+Only consolidate duplicated JSPs.
+
+---
+
+## 8. Preserve UI
+
+The rendered page must remain identical.
+
+Do not change
+
+- layout
+- spacing
+- styling
+- JavaScript
+- validation
+- forms
+- responsiveness
+
+---
+
+# Validation
+
+Verify:
+
+- Duplicate JSPs identified.
+- Every reference to `WebContent` reported.
+- Every include verified.
+- Every forward verified.
+- Every redirect verified.
+- Every controller mapping verified.
+- No broken navigation.
+- No missing JSPs.
+- UI unchanged.
+- Functionality unchanged.
+
+---
+
+# Output Requirements
+
+Provide:
+
+## Duplicate JSP
+
+```
+WebContent/customer/search.jsp
+
+WEB-INF/views/customer/search.jsp
+```
+
+---
+
+## Differences
+
+List any differences.
+
+---
+
+## References Found
+
+List every file that still references the `WebContent` version.
+
+Include:
+
+- file
+- method
+- line number
+- code snippet
+
+---
+
+## Recommendation
+
+One of:
+
+### Safe to remove
+
+No references remain.
+
+Delete:
+
+```
+WebContent/customer/search.jsp
+```
+
+---
+
+### Developer Review Required
+
+References still exist.
+
+Do **not** delete.
+
+List all references that require migration.
+
+---
+
+## Files Updated
+
+List:
+
+- controllers
+- XML
+- JSP includes
+- configuration
+- Java classes
+
+---
+
+## Confirmation
+
+Confirm:
+
+- functionality unchanged
+- routing unchanged
+- UI unchanged
+- only duplicate JSP consolidation performed
+
+---
+
+# Golden Rules
+
+1. `WEB-INF/views` is the **expected** canonical location for a WAR project.
+2. Never delete a duplicated JSP without first searching the entire project for references.
+3. If **any** reference still points to `WebContent`, stop automatic deletion and produce a migration report.
+4. The developer decides the final golden copy when references still exist.
+5. Preserve 100% functional equivalence.
+6. Preserve 100% visual equivalence.
+7. Make the smallest possible changes while eliminating duplicate JSPs.
+8. Do not perform unrelated refactoring.
