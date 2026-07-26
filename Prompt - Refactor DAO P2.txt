@@ -1,0 +1,512 @@
+# DAO Migration Instructions
+
+## Objective
+
+Migrate all DAO implementations from the legacy package:
+
+```text
+com.aiab.CreditControl.service
+```
+
+to the new architecture:
+
+```text
+com.aiab.hccss.daos
+com.aiab.hccss.daos.impl
+```
+
+The migration must preserve all existing functionality while eliminating dependencies on the legacy package.
+
+---
+
+# Overall Goal
+
+After the migration:
+
+- All DAO implementations reside under `com.aiab.hccss.daos.impl`
+- Every DAO has a corresponding interface under `com.aiab.hccss.daos`
+- No class under `com.aiab.hccss` references any class in `com.aiab.CreditControl.service`
+- Business logic remains unchanged
+- The application compiles successfully
+- Existing functionality continues to work
+
+---
+
+# Migration Rules
+
+## Rule 1 - Existing DAO Implementation
+
+If both classes exist:
+
+```text
+Legacy
+-------
+com.aiab.CreditControl.service.LetterDaoJdbc
+
+New
+----
+com.aiab.hccss.daos.impl.LetterDaoJdbc
+```
+
+Then migrate all implementation into the new DAO.
+
+This includes:
+
+- SQL
+- JdbcTemplate logic
+- NamedParameterJdbcTemplate logic
+- RowMapper
+- BeanPropertyRowMapper
+- helper methods
+- private methods
+- constants
+- validation
+- business logic
+- logging
+- transactions
+- exception handling
+
+Do NOT keep delegation.
+
+Replace code like:
+
+```java
+private com.aiab.CreditControl.service.LetterDaoJdbc dao;
+
+public LetterDaoJdbc() {
+    dao = new com.aiab.CreditControl.service.LetterDaoJdbc();
+}
+
+public Letter find(...) {
+    return dao.find(...);
+}
+```
+
+with the complete implementation.
+
+The new DAO must become self-contained.
+
+---
+
+## Rule 2 - DAO Does Not Exist
+
+If only the legacy DAO exists:
+
+```text
+CreditControl/service/BlockCodeInfoDaoJdbc.java
+```
+
+Create:
+
+```text
+com.aiab.hccss.daos.BlockCodeInfoDao
+```
+
+and
+
+```text
+com.aiab.hccss.daos.impl.BlockCodeInfoDaoJdbc
+```
+
+Move the complete implementation into the new DAO.
+
+---
+
+## Rule 3 - DAO Dependencies
+
+If migrated DAOs reference one another, replace all legacy references.
+
+Replace:
+
+```java
+new LetterDaoJdbc()
+```
+
+with constructor injection.
+
+Example:
+
+```java
+private final LetterDao letterDao;
+
+public ReportDaoJdbc(
+        LetterDao letterDao) {
+    this.letterDao = letterDao;
+}
+```
+
+Never instantiate another DAO using `new`.
+
+Always inject the DAO interface.
+
+---
+
+## Rule 4 - Shared Utility Methods
+
+If helper methods are duplicated across multiple DAOs, extract them into:
+
+```text
+com.aiab.hccss.common
+```
+
+or
+
+```text
+com.aiab.hccss.util
+```
+
+Avoid code duplication.
+
+---
+
+## Rule 5 - Preserve Business Behaviour
+
+Do NOT change:
+
+- SQL behaviour
+- business logic
+- validation rules
+- returned values
+- exception behaviour
+
+Only refactor the architecture.
+
+---
+
+## Rule 6 - Exception Handling
+
+Keep existing exception handling.
+
+Example:
+
+```java
+catch (DatabaseException ex) {
+    throw new DataAccessException.Builder()
+            .databaseException(ex)
+            .module(ModuleEnum.ACCESS_AUTH)
+            .operation(CrudOperation.GET)
+            .build();
+}
+```
+
+Do not swallow exceptions.
+
+---
+
+## Rule 7 - Dependency Injection
+
+Prefer constructor injection.
+
+Avoid:
+
+```java
+@Autowired
+private LetterDao dao;
+```
+
+Use:
+
+```java
+private final LetterDao dao;
+
+public LetterDaoJdbc(
+        LetterDao dao) {
+    this.dao = dao;
+}
+```
+
+---
+
+## Rule 8 - Code Quality
+
+After migration:
+
+- remove unused imports
+- remove commented code
+- remove dead code
+- remove legacy wrappers
+- remove duplicate methods
+- remove unnecessary constructors
+
+---
+
+# Mandatory Migration Checklist
+
+Every DAO migration must complete the following checklist.
+
+## Step 1
+
+Analyse the legacy DAO.
+
+Identify:
+
+- public methods
+- private methods
+- SQL
+- constants
+- helper methods
+- dependencies
+- injected services
+
+---
+
+## Step 2
+
+Determine whether the DAO already exists in:
+
+```text
+com.aiab.hccss.daos.impl
+```
+
+If yes:
+
+Merge implementation.
+
+If no:
+
+Create DAO interface and implementation.
+
+---
+
+## Step 3
+
+Move all implementation.
+
+Do NOT delegate back to the legacy DAO.
+
+---
+
+## Step 4
+
+Replace dependencies.
+
+Replace all legacy DAO references with the corresponding DAO interface.
+
+---
+
+## Step 5
+
+Update imports.
+
+Remove:
+
+```java
+import com.aiab.CreditControl.service.*;
+```
+
+---
+
+## Step 6
+
+Compile.
+
+Resolve:
+
+- compile errors
+- missing imports
+- missing methods
+
+Project must compile successfully.
+
+---
+
+# Mandatory Testing
+
+Testing is REQUIRED after each DAO migration.
+
+Do not proceed to the next DAO until all tests pass.
+
+---
+
+## Compilation Testing
+
+Verify:
+
+- Project compiles
+- No compiler warnings caused by migration
+- No missing imports
+- No missing methods
+- No interface mismatch
+
+---
+
+## Functional Testing
+
+Verify every migrated method:
+
+- returns the same result
+- performs identical SQL
+- preserves validation
+- preserves transaction behaviour
+- preserves logging
+- preserves exception handling
+
+Business behaviour must remain identical.
+
+---
+
+## Cross Reference Testing
+
+Search the project for:
+
+```text
+com.aiab.CreditControl.service.<MigratedDao>
+```
+
+Replace every remaining usage.
+
+Repeat until there are zero references.
+
+---
+
+## Dependency Testing
+
+Verify:
+
+- constructor injection works
+- Spring creates beans successfully
+- no circular dependency introduced
+
+---
+
+## Unit Testing
+
+If unit tests already exist:
+
+- update imports
+- replace legacy mocks
+- ensure every existing test passes
+
+If unit tests do not exist:
+
+Create JUnit 5 tests covering:
+
+- successful query
+- empty result
+- invalid parameter
+- null parameter
+- database exception
+- multiple rows
+- boundary conditions
+
+Use Mockito.
+
+Target:
+
+- 80%+ line coverage
+- 80%+ branch coverage where practical
+
+---
+
+## Integration Testing
+
+Run integration tests against the application's database.
+
+Verify:
+
+- SELECT
+- INSERT
+- UPDATE
+- DELETE
+
+Verify:
+
+- transaction rollback
+- exception propagation
+- row mapping
+- SQL correctness
+
+---
+
+## Regression Testing
+
+Verify existing functionality still works.
+
+Test:
+
+- Controllers
+- Services
+- Scheduled Jobs
+- Batch Jobs
+- Existing APIs
+
+No regression should be introduced.
+
+---
+
+## Final Validation
+
+For the migrated DAO:
+
+Search:
+
+```text
+com.aiab.CreditControl.service.<MigratedDao>
+```
+
+Result:
+
+```
+0 references
+```
+
+---
+
+After ALL migrations:
+
+Search:
+
+```text
+com.aiab.CreditControl.service
+```
+
+Result:
+
+No references from:
+
+```text
+com.aiab.hccss
+```
+
+---
+
+# Migration Report
+
+After completing each DAO, generate the following report.
+
+| Item | Status |
+|------|--------|
+| DAO Interface Created | ✅ / N/A |
+| DAO Implementation Created | ✅ |
+| SQL Migrated | ✅ |
+| Business Logic Migrated | ✅ |
+| Helper Methods Migrated | ✅ |
+| Constants Migrated | ✅ |
+| Transactions Preserved | ✅ |
+| Logging Preserved | ✅ |
+| Exception Handling Preserved | ✅ |
+| Legacy Delegation Removed | ✅ |
+| Legacy Imports Removed | ✅ |
+| Constructor Injection Applied | ✅ |
+| Project Compiles | ✅ |
+| Unit Tests Passed | ✅ |
+| Integration Tests Passed | ✅ |
+| Regression Tests Passed | ✅ |
+| Ready for Legacy Removal | ✅ |
+
+---
+
+# Completion Criteria
+
+The migration is considered complete only when:
+
+- All DAO implementations exist under `com.aiab.hccss.daos.impl`
+- All DAO interfaces exist under `com.aiab.hccss.daos`
+- No class under `com.aiab.hccss` references `com.aiab.CreditControl.service`
+- No delegation to legacy DAOs exists
+- The application compiles successfully
+- Unit tests pass
+- Integration tests pass
+- Regression tests pass
+- Existing functionality is preserved
+- Legacy DAO classes are no longer required by the new module
