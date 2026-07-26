@@ -1,0 +1,43 @@
+Refactor the legacy DAO from:
+
+com.aiab.CreditControl.service
+
+to
+
+com.aiab.hccss.daos.impl
+
+IMPORTANT:
+
+This is NOT a wrapper or adapter migration.
+
+If a DAO already exists in `com.aiab.hccss.daos.impl`, move ALL implementation from the legacy DAO into the existing implementation.
+
+Do NOT leave any business logic inside `com.aiab.CreditControl.service`.
+
+Do NOT call or delegate to the legacy DAO.
+
+For example, this is NOT allowed:
+
+private com.aiab.CreditControl.service.LetterDaoJdbc dao;
+
+return dao.find(...);
+
+Instead, copy the actual implementation (SQL, helper methods, private methods, business logic, validation, constants, RowMapper, JdbcTemplate code, exception handling, logging, transactions, etc.) directly into the corresponding DAO in `com.aiab.hccss.daos.impl`.
+
+After migration:
+
+- Delete every field referencing `com.aiab.CreditControl.service.*`.
+- Delete every constructor instantiating the legacy DAO.
+- Delete every method that simply delegates to the legacy DAO.
+- The new DAO must be completely self-contained.
+
+If no DAO exists in `hccss.daos.impl`, create the DAO interface and implementation, then migrate the complete implementation from the legacy DAO.
+
+Before completing each DAO migration, verify:
+1. There are ZERO references to `com.aiab.CreditControl.service.<CurrentDao>` in the migrated DAO.
+2. All methods from the legacy DAO exist in the new DAO.
+3. All private/helper methods used by those methods are also migrated.
+4. The legacy DAO can be deleted without breaking the migrated DAO.
+5. The project compiles successfully.
+
+Do not stop after replacing method calls. Physically move every method implementation from the legacy DAO into the new DAO until the legacy class contains no unique business logic.
