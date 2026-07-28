@@ -1,0 +1,8 @@
+Do not extend DBManager.
+Remove getConnection().
+Remove the no-argument constructor.
+Inject JdbcTemplate via constructor only.
+Annotate with @Repository.
+Use JdbcTemplate.execute(ConnectionCallback) or other JdbcTemplate APIs instead of manually obtaining a Connection.
+Preserve all SQL, mapping logic, and exception handling.
+Match the coding style and structure of the existing DAOs under hccss/daos/impl.
