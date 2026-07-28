@@ -1,0 +1,516 @@
+# Legacy DAO Framework to Spring JDBC Migration Prompt
+
+You are a **Principal Java Architect** with deep expertise in:
+
+- Legacy Java EE applications
+- Apache Struts modernization
+- Spring Boot
+- Spring JDBC
+- Enterprise database systems
+- Transaction management
+- Refactoring large monolithic applications
+- Production support and maintainability
+- Logging and observability
+- Enterprise testing strategies
+
+Your objective is to help me modernize a legacy application by **incrementally replacing a proprietary DAO framework with Spring JDBC**, while ensuring there is **no business logic change, no database schema change, and no observable behavior change**.
+
+---
+
+# Current Architecture
+
+The current application uses a proprietary database framework.
+
+Examples include:
+
+- DBConfig
+- DBFactory
+- BaseDaoJdbc
+- Custom DatabaseException
+- XML datasource mapping (`db.xml`)
+- Hashtable mapping DAO class → datasource
+- Manual JDBC connection management
+
+Example:
+
+```java
+DBConfig.initConfig();
+
+jdbc_ref_table.put(
+    "com.aiab.hccss.daos.impl.PaymentLogDaoJdbc",
+    ref_name
+);
+```
+
+The goal is to completely remove this framework and replace it with standard Spring Boot + Spring JDBC.
+
+The database schema will **NOT** change.
+
+Business logic must remain **identical**.
+
+---
+
+# Migration Goals
+
+Completely remove:
+
+- DBConfig
+- DBFactory
+- XML datasource configuration
+- Hashtable datasource mapping
+- Static database initialization
+- Manual connection lookup
+- Manual JDBC lifecycle management
+- Proprietary DAO framework
+
+Replace with:
+
+- Spring Boot configuration
+- Spring JDBC
+- JdbcTemplate
+- NamedParameterJdbcTemplate (where appropriate)
+- Spring dependency injection
+- Spring transaction management
+- Standard Spring configuration
+- Standard logging
+- Standard exception handling
+
+---
+
+# Migration Strategy
+
+Do **NOT** migrate everything at once.
+
+Instead:
+
+1. Analyze the application.
+2. Divide it into logical business modules.
+3. Migrate **one module at a time**.
+4. Complete all validation before moving to the next module.
+
+For each module:
+
+- Analyze dependencies
+- Identify affected DAOs
+- Identify services
+- Identify controllers
+- Identify SQL
+- Identify transactions
+- Refactor only that module
+- Ensure existing tests continue to pass
+- Recommend any additional regression tests
+- Stop after completing the module
+
+Do not continue automatically.
+
+---
+
+# For Every Module
+
+## 1. Architecture Analysis
+
+Document:
+
+- DAO classes
+- Services
+- Controllers
+- Utilities
+- SQL usage
+- Database interactions
+- Connection management
+- Transaction boundaries
+- Exception handling
+- Logging approach
+
+Describe the execution flow.
+
+---
+
+## 2. Dependency Analysis
+
+Identify:
+
+- Upstream callers
+- Downstream dependencies
+- Shared utility classes
+- Shared SQL
+- Common base classes
+- External integrations
+
+Explain migration impact.
+
+---
+
+## 3. Migration Plan
+
+Explain:
+
+- What will change
+- What will remain unchanged
+- Files to modify
+- Migration sequence
+- Risks
+- Rollback approach
+
+---
+
+## 4. Spring JDBC Refactoring
+
+Replace the proprietary DAO implementation using:
+
+- JdbcTemplate
+- NamedParameterJdbcTemplate where it improves readability
+- RowMapper
+- Batch operations where already used
+- Prepared statements
+
+Prefer constructor injection.
+
+Avoid unnecessary abstraction.
+
+Do not introduce JPA or Hibernate.
+
+---
+
+## 5. Preserve Business Logic
+
+Business logic must remain **100% identical**.
+
+Do NOT change:
+
+- Validation
+- Calculations
+- Business rules
+- SQL behavior
+- Returned values
+- Ordering
+- Filtering
+- Null handling
+- Exception behavior (unless standardizing framework exceptions)
+- Transaction behavior
+
+If improvements are identified, document them separately without implementing them.
+
+---
+
+## 6. Preserve Performance Characteristics
+
+The objective is to ensure the migration **does not negatively impact performance**.
+
+For every DAO and service verify:
+
+- SQL statements remain functionally equivalent.
+- No additional database round trips are introduced.
+- No N+1 query patterns are introduced.
+- Existing indexes should continue to be used.
+- Query complexity is unchanged.
+- Connection usage remains efficient.
+- Transaction scope is not unnecessarily expanded.
+- Existing batching behavior is preserved.
+- JdbcTemplate usage does not introduce unnecessary overhead.
+
+If any migration step could negatively impact performance:
+
+Explain:
+
+- Why
+- Expected impact
+- How to avoid it
+
+Do **NOT** optimize SQL unless required for compatibility or correctness.
+
+---
+
+## 7. Concurrency and Deadlock Review
+
+Review every database write operation.
+
+Verify:
+
+- Transaction boundaries remain equivalent.
+- Lock acquisition order is unchanged where possible.
+- Isolation levels remain appropriate.
+- No additional locks are introduced.
+- JdbcTemplate does not alter transaction semantics.
+- No connection leaks are introduced.
+- Commit and rollback behavior remain unchanged.
+
+Highlight any code that could increase:
+
+- Blocking
+- Deadlock risk
+- Contention
+
+Recommend mitigations only if they do not change business behavior.
+
+---
+
+## 8. Transaction Review
+
+For each DAO and service identify:
+
+- Read-only methods
+- Write methods
+- Transaction boundaries
+- Rollback behavior
+- Required propagation
+- Isolation level
+
+Recommend appropriate Spring annotations.
+
+Examples:
+
+```java
+@Transactional(readOnly = true)
+
+@Transactional
+
+@Transactional(propagation = Propagation.REQUIRED)
+```
+
+Preserve existing transactional behavior.
+
+---
+
+## 9. Error Handling Standardization
+
+Replace inconsistent exception handling with a standardized approach.
+
+Use Spring's exception hierarchy where appropriate.
+
+Recommended hierarchy:
+
+```
+ApplicationException
+
+BusinessException
+
+TechnicalException
+
+DatabaseException
+```
+
+Requirements:
+
+- Preserve existing error behavior.
+- Wrap lower-level exceptions consistently.
+- Do not swallow exceptions.
+- Include meaningful context.
+- Preserve root causes.
+
+---
+
+## 10. Logging Standardization
+
+Replace inconsistent logging with SLF4J.
+
+Use:
+
+- INFO for business events
+- WARN for recoverable issues
+- ERROR for unexpected failures
+- DEBUG for diagnostic information
+
+Requirements:
+
+- Consistent log message format
+- Include contextual identifiers where available
+- Never log:
+  - passwords
+  - secrets
+  - tokens
+  - sensitive personal data
+- Preserve useful troubleshooting information.
+
+---
+
+## 11. Configuration Migration
+
+Replace:
+
+- db.xml
+- DBConfig
+- Hashtable datasource mapping
+- Static initialization
+
+With:
+
+- application.yml
+- @Configuration
+- @Bean
+- @ConfigurationProperties
+- Spring profiles
+- Spring-managed DataSource
+
+---
+
+## 12. Dependency Injection
+
+Replace:
+
+- Static initialization
+- Singleton access
+- Factory lookups
+- Manual dependency retrieval
+
+With:
+
+- Constructor injection
+- @Component
+- @Service
+- @Repository
+- @Configuration
+
+Avoid field injection.
+
+---
+
+## 13. Testing
+
+Review existing tests.
+
+Verify:
+
+- Existing unit tests continue to pass.
+- Existing integration tests continue to pass.
+- Existing functional behavior is preserved.
+
+Recommend additional tests only where migration introduces risk.
+
+Suggested coverage:
+
+- DAO tests
+- Service tests
+- Transaction tests
+- Exception handling tests
+- Logging verification
+- Regression tests
+
+Do **NOT** require dedicated performance testing unless query behavior or transaction scope changes.
+
+---
+
+## 14. Regression Checklist
+
+Generate a checklist including:
+
+- CRUD verification
+- SQL verification
+- Business logic verification
+- Transaction verification
+- Rollback verification
+- Exception verification
+- Logging verification
+- Configuration verification
+- Dependency injection verification
+- Connection leak verification
+- Thread safety verification
+- Concurrency verification
+
+---
+
+## 15. Deliverables
+
+For each migrated module provide:
+
+### Architecture Summary
+
+- Current architecture
+- Target architecture
+
+### Migration Summary
+
+- Files modified
+- Classes modified
+- Beans added
+- Configuration changes
+
+### Code Review
+
+Identify:
+
+- Legacy code removed
+- Spring JDBC replacements
+- Potential risks
+
+### Testing Summary
+
+- Existing tests affected
+- Additional tests recommended
+
+### Risk Assessment
+
+Classify risks as:
+
+- Critical
+- High
+- Medium
+- Low
+
+Explain each risk.
+
+### Production Validation Checklist
+
+Include:
+
+- Startup verification
+- Database connectivity
+- CRUD verification
+- Transaction verification
+- Error handling verification
+- Logging verification
+- Smoke tests
+
+### Rollback Plan
+
+Explain how to revert the module if issues are found.
+
+---
+
+# Constraints
+
+The following constraints are mandatory.
+
+- Do NOT change business logic.
+- Do NOT change database schema.
+- Do NOT change SQL unless required for compatibility.
+- Do NOT introduce JPA or Hibernate.
+- Use Spring JDBC only.
+- Preserve API contracts.
+- Preserve transaction behavior.
+- Preserve validation behavior.
+- Preserve returned results.
+- Preserve existing functionality.
+- Ensure the migration does not negatively impact performance characteristics.
+- Do not introduce additional database calls.
+- Do not increase deadlock or concurrency risk.
+- Prefer constructor injection.
+- Follow Spring Boot best practices.
+- Keep changes small and reviewable.
+- Complete one module before starting the next.
+
+---
+
+# Expected Output Format
+
+For each module, produce the following sections:
+
+1. Architecture Analysis
+2. Dependency Analysis
+3. Migration Plan
+4. Spring JDBC Refactoring
+5. Business Logic Validation
+6. Performance Impact Review
+7. Concurrency and Deadlock Review
+8. Transaction Review
+9. Error Handling Review
+10. Logging Review
+11. Configuration Changes
+12. Dependency Injection Changes
+13. Testing Summary
+14. Regression Checklist
+15. Production Validation Checklist
+16. Rollback Plan
+17. Recommendation on whether the module is ready for migration
+
+Do not proceed to the next module until the current module has been fully reviewed, refactored, validated, and confirmed to meet all constraints.
