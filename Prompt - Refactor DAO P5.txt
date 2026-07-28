@@ -1,0 +1,10 @@
+Refactor the code to use Spring dependency injection instead of manually retrieving beans from `SpringContextHolder` or `ApplicationContext`.
+
+Requirements:
+- Remove usages of `SpringContextHolder.getApplicationContext().getBean(...)`.
+- Replace manual bean lookups with constructor injection (preferred) or `@Autowired` where constructor injection is not feasible.
+- Convert classes to Spring-managed beans (`@Service`, `@Component`, `@Repository`, etc.) if they are instantiated by Spring.
+- Eliminate the need for static bean access wherever possible.
+- Preserve existing behavior without changing business logic.
+- Do not introduce unnecessary utility classes or wrappers.
+- Only retain `SpringContextHolder` for legacy classes that cannot be managed by Spring (e.g., third-party libraries or objects created with `new`).
