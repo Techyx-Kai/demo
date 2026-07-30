@@ -1,0 +1,40 @@
+1. Domains that I used GitHub Copilot for
+
+I used GitHub Copilot to assist in several areas, including:
+
+Technical research (e.g., understanding Okta SPA vs Backend authentication flow)
+Migrating application components from Struts to Spring MVC
+Developing Playwright automated test cases
+Resolving SonarQube and Prisma findings
+Implementing AKS health probes and Health APIs
+Implementing Security Audit Logging
+Code refactoring, debugging, and documentation
+Develop APIs to integrate with different applications
+
+
+2. Velocity of adaptation / learning curve
+
+Medium
+
+Getting started with GitHub Copilot was relatively easy. With clear prompts, it can provide useful suggestions for coding, technical research, and troubleshooting.
+
+However, using Copilot effectively takes more practice. Writing better prompts, refining responses, validating generated code, and minimizing token usage are skills to improve over time. 
+
+3. Measurement of business benefits
+GitHub Copilot helped reduce the time spent on technical research, repetitive coding, and issue remediation, allowing more time to focus on other project activities.
+
+It supported work such as:
+
+Okta implementation research
+Struts to Spring MVC migration
+Playwright test development
+SonarQube and Prisma issue remediation
+AKS health probes and Health APIs
+Security Audit Logging
+
+The time saved also allowed me to spend more time on:
+CAB and change management activities
+Security Tollgate requirements
+Environment setup and deployment
+Code reviews, testing, and validation
+Technical discussions and infra integration issue investigation
