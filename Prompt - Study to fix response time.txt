@@ -1,0 +1,212 @@
+# Legacy Spring MVC Performance and Architecture Assessment
+
+## Objective
+
+Act as a Principal Java Performance Architect.
+
+The current Spring MVC application has significant response time issues. The slowness has led to discussions about redesigning or replacing the application architecture.
+
+Your objective is NOT to redesign the application immediately.
+
+First determine whether the performance issues are caused by:
+
+- inefficient implementation
+- poor coding practices
+- database bottlenecks
+- infrastructure
+- configuration
+- network latency
+- unnecessary request flow
+- or actual architectural limitations.
+
+Only recommend architectural changes if they are supported by evidence.
+
+---
+
+## Phase 1 - Understand the System
+
+Study the entire application:
+
+- Spring MVC
+- Controllers
+- Services
+- DAOs
+- JSP
+- Filters
+- Interceptors
+- Spring configuration
+- Security
+- Database
+- External API integrations
+- Session handling
+- Authentication
+- Logging
+- Thread pools
+- Caching
+- Build configuration
+
+Generate:
+
+- Architecture diagram
+- Request lifecycle
+- Module dependency diagram
+
+---
+
+## Phase 2 - Measure Every Request
+
+For every major user action:
+
+Identify:
+
+- URL
+- Controller
+- Service
+- DAO
+- SQL executed
+- Stored procedures
+- External API calls
+- JSP rendering
+- JavaScript execution
+
+Measure estimated time spent in:
+
+- Controller
+- Business logic
+- Database
+- JSP rendering
+- External services
+- Authentication
+- Session validation
+
+Produce a request timing breakdown.
+
+---
+
+## Phase 3 - Identify Root Causes
+
+Determine whether slow response is caused by:
+
+### Database
+
+- Slow SQL
+- Missing indexes
+- N+1 queries
+- Repeated queries
+- Large result sets
+- Full table scans
+
+### Backend
+
+- Duplicate business logic
+- Expensive loops
+- Reflection
+- Large object creation
+- Inefficient collections
+- Blocking operations
+- Excessive synchronization
+
+### Spring MVC
+
+- Too many interceptors
+- Multiple redirects
+- Session lookups
+- Heavy Model population
+- View resolution overhead
+
+### JSP
+
+- Large tables
+- Nested JSTL
+- Excessive EL evaluation
+- Large DOM generation
+
+### Frontend
+
+- Multiple synchronous AJAX calls
+- Large JavaScript bundles
+- Unnecessary page refreshes
+
+### Infrastructure
+
+- Network latency
+- Reverse proxy
+- Load balancer
+- Authentication provider
+- SSL termination
+
+---
+
+## Phase 4 - Challenge the Existing Architecture
+
+Determine whether the current architecture is actually the problem.
+
+For every issue classify it as:
+
+- Code issue
+- Configuration issue
+- Database issue
+- Infrastructure issue
+- Architectural issue
+
+Estimate how much performance improvement can be achieved WITHOUT changing the architecture.
+
+---
+
+## Phase 5 - Detect Over-Engineering
+
+Identify unnecessary architectural complexity such as:
+
+- Multiple redirects
+- Repeated authentication
+- Duplicate validation
+- Excessive service layers
+- Redundant DTO mapping
+- Circular dependencies
+- Multiple conversions
+- Excessive abstraction
+- Duplicate REST calls
+- Duplicate database access
+
+Recommend simplification where appropriate.
+
+---
+
+## Phase 6 - Evaluate Architecture Redesign
+
+Only if evidence supports it, evaluate whether migrating to another architecture (e.g., Spring Boot REST + React, microservices, or other patterns) would materially improve performance.
+
+For each proposed architectural change:
+
+- Current bottleneck
+- Why the current architecture cannot reasonably address it
+- Expected performance improvement
+- Development effort
+- Risks
+- Migration complexity
+
+Do not recommend architectural changes solely because the application is old.
+
+---
+
+## Deliverables
+
+Produce:
+
+1. Executive Summary
+2. Current Architecture Review
+3. Performance Bottlenecks
+4. Root Cause Analysis
+5. Quick Wins (Low effort, high impact)
+6. Medium-term Improvements
+7. Long-term Refactoring
+8. Whether an architecture redesign is justified
+9. Estimated performance gains for each recommendation
+10. Prioritized implementation roadmap
+
+## Constraints
+
+- Preserve existing functionality.
+- Minimize risk.
+- Recommend architecture changes only when supported by measurable evidence.
+- Quantify the expected performance benefit of every recommendation.
