@@ -1,0 +1,740 @@
+# HCCSS Playwright Automation Framework
+
+## Objective
+
+The objective is to build a maintainable, scalable and reusable Playwright automation framework for the HCCSS application.
+
+The work shall be performed in three phases:
+
+1. Generate a reusable Knowledge Base.
+2. Generate a Playwright Test Plan based on the Knowledge Base.
+3. Generate Playwright automation based on the approved Test Plan.
+
+The Knowledge Base is the **single source of truth** for all future Playwright development.
+
+---
+
+# Repositories
+
+## Application
+
+hccss-credit-control-rad
+
+Contains
+
+- Spring MVC Controllers
+- Services
+- JSP pages
+- JavaScript
+- CSS
+- Business Logic
+
+---
+
+## Database
+
+hccss-db-db_ebiz-iaas
+
+Contains
+
+- SQL Server
+- Stored Procedures
+- Tables
+- Views
+- Business Rules
+- SQL Scripts
+
+---
+
+## Automation
+
+hccss-playwright-webapp
+
+Contains
+
+- Playwright Tests
+- Page Objects
+- Fixtures
+- Helpers
+- Utilities
+- Test Data
+- Existing Automation
+
+---
+
+# Overall Workflow
+
+```
+
+Source Code
+│
+├── hccss-credit-control-rad
+├── hccss-db-db_ebiz-iaas
+└── hccss-playwright-webapp
+│
+▼
+Step 1
+Knowledge Base
+│
+▼
+Step 2
+Playwright Test Plan
+│
+▼
+Review & Approval
+│
+▼
+Step 3
+Playwright Test Generation
+│
+▼
+Coverage Update
+│
+▼
+Knowledge Base Update
+
+```
+
+---
+
+# Step 1 - Generate Knowledge Base
+
+## Objective
+
+Study the application and create reusable documentation.
+
+The documentation should become the permanent knowledge base for future Playwright work.
+
+Do not generate Playwright tests during this phase.
+
+---
+
+## Analyse
+
+Study all three repositories.
+
+Understand
+
+- Business modules
+- User journeys
+- Navigation flow
+- Business workflow
+- Spring MVC Controllers
+- Services
+- JSP pages
+- JavaScript
+- AJAX
+- CSS
+- Database tables
+- Stored Procedures
+- Validation rules
+- Success messages
+- Error messages
+- Existing Playwright implementation
+- Existing Playwright coverage
+
+---
+
+## Output
+
+Generate
+
+```
+
+docs/
+└── study/
+
+```
+
+---
+
+## Folder Structure
+
+```
+
+docs/
+└── study/
+│
+├── overview.md
+├── module-catalog.md
+├── navigation.md
+├── business-flow.md
+├── controller-analysis.md
+├── jsp-analysis.md
+├── database-analysis.md
+├── validation-rules.md
+├── datasets.md
+├── playwright-framework.md
+├── coverage.md
+├── changelog.md
+│
+├── modules/
+│
+└── diagrams/
+
+```
+
+---
+
+# overview.md
+
+Document
+
+- Application overview
+- Technology stack
+- Authentication
+- High-level architecture
+- Deployment overview
+- Repository responsibilities
+
+---
+
+# module-catalog.md
+
+Identify every business module.
+
+For each module document
+
+- Module Name
+- Description
+- Parent Module
+- Child Modules
+- Entry Page
+- Exit Page
+- Navigation
+- Complexity
+- Automation Priority
+
+Recommend automation order.
+
+---
+
+# navigation.md
+
+Document
+
+- Menu hierarchy
+- Navigation paths
+- Redirects
+- Parent/Child navigation
+
+Include Mermaid diagrams whenever appropriate.
+
+---
+
+# business-flow.md
+
+Identify every complete business flow.
+
+Document
+
+- Start page
+- End page
+- Modules involved
+- Preconditions
+- Expected outcome
+- Database updates
+- Stored Procedures executed
+
+---
+
+# controller-analysis.md
+
+For every Controller
+
+Document
+
+- URL
+- Request Mapping
+- Request Method
+- Parameters
+- Validation
+- JSP returned
+- Services invoked
+
+---
+
+# jsp-analysis.md
+
+For every JSP
+
+Document
+
+- Purpose
+- Fields
+- Buttons
+- Tables
+- JavaScript
+- AJAX
+- CSS
+- Navigation
+- Validation
+- Success Messages
+- Error Messages
+
+---
+
+# database-analysis.md
+
+Analyse
+
+- Tables
+- Views
+- Stored Procedures
+
+For every Stored Procedure
+
+Document
+
+- Purpose
+- Parameters
+- CRUD
+- Business Rules
+- Tables updated
+- Called by Controller
+- Called by Service
+
+---
+
+# validation-rules.md
+
+Document
+
+- Mandatory fields
+- Format validation
+- Boundary validation
+- Duplicate validation
+- Business rule validation
+- Role validation
+- Status validation
+- Error messages
+- Success messages
+
+---
+
+# datasets.md
+
+Separate test data into
+
+## Static Data
+
+Examples
+
+- Status
+- Country
+- Currency
+- Product
+- Branch
+- Master Data
+- Lookup Values
+
+These should remain constant.
+
+Store centrally.
+
+---
+
+## Dynamic Data
+
+Generate during execution.
+
+Examples
+
+- Customer Name
+- Reference Number
+- Case Number
+- Cheque Number
+- Email
+- Date
+- Remarks
+
+Recommend reusable generators.
+
+Avoid hardcoded transactional data.
+
+---
+
+# playwright-framework.md
+
+Study existing Playwright project.
+
+Document
+
+- Folder structure
+- Page Objects
+- Fixtures
+- Helpers
+- Utilities
+- Constants
+- Test Data
+- Reports
+- Existing reusable components
+
+Identify refactoring opportunities.
+
+---
+
+# coverage.md
+
+Compare
+
+Application
+
+VS
+
+Existing Playwright Tests
+
+Document
+
+- Existing Coverage
+- Missing Coverage
+- Duplicate Coverage
+- Automation Priority
+
+---
+
+# Module Documentation
+
+Generate one Markdown for every module.
+
+```
+
+docs/
+study/
+modules/
+
+```
+
+Each module shall contain
+
+# Overview
+
+## Purpose
+
+## Business Rules
+
+## Navigation
+
+## Controllers
+
+## JSP Pages
+
+## Services
+
+## Stored Procedures
+
+## Database Tables
+
+## Validation Rules
+
+## Success Messages
+
+## Error Messages
+
+## Static Data
+
+## Dynamic Data
+
+## Dependencies
+
+## Upstream Modules
+
+## Downstream Modules
+
+## Existing Coverage
+
+## Missing Coverage
+
+## Notes
+
+---
+
+# Step 2 - Generate Playwright Test Plan
+
+## Objective
+
+Generate the Playwright Test Plan only.
+
+Do NOT generate Playwright code.
+
+Always use
+
+```
+
+docs/study
+
+```
+
+as the source of truth.
+
+Never rediscover the application unless documentation is missing or outdated.
+
+---
+
+## Work Module-by-Module
+
+Generate test plans for one module at a time.
+
+Wait for approval before moving to the next module.
+
+---
+
+## Test Categories
+
+Generate
+
+### Functional Tests
+
+- Happy Flow
+- CRUD
+- Search
+- Filter
+- Sort
+- Pagination
+
+---
+
+### Validation Tests
+
+- Mandatory Fields
+- Invalid Format
+- Boundary Values
+- Duplicate Values
+- Business Rules
+
+---
+
+### Negative Tests
+
+- Invalid Navigation
+- Invalid Workflow
+- Unauthorized Access
+- Missing Data
+- Session Timeout
+- Invalid State Transition
+
+---
+
+### End-to-End Tests
+
+Cover
+
+- Cross-module flow
+- Business workflow
+- Database updates
+- Stored Procedures
+- UI updates
+- Navigation
+
+---
+
+## Test Data
+
+For every test identify
+
+### Static Data
+
+Reference
+
+docs/study/datasets.md
+
+### Dynamic Data
+
+Specify
+
+- Generated fields
+- Generator required
+- Cleanup required
+
+---
+
+## Output
+
+Generate
+
+```
+
+docs/
+test-plan/
+
+```
+
+Example
+
+```
+
+docs/
+test-plan/
+customer-search.md
+maintenance.md
+approval.md
+
+```
+
+Each module shall contain
+
+# Module
+
+## Scope
+
+## Functional Tests
+
+## Happy Flow
+
+## Unhappy Flow
+
+## Validation Tests
+
+## Negative Tests
+
+## End-to-End Tests
+
+## Required Test Data
+
+## Required Database Validation
+
+## Automation Notes
+
+## Coverage Gap
+
+---
+
+## Test Case Template
+
+Each test case shall include
+
+- Test ID
+- Module
+- Priority
+- Scenario
+- Preconditions
+- Test Steps
+- Expected UI Result
+- Expected Database Result
+- Stored Procedures
+- Static Data
+- Dynamic Data
+- Tags
+
+---
+
+# Step 3 - Generate Playwright Automation
+
+## Objective
+
+Generate Playwright automation only after the Test Plan has been reviewed and approved.
+
+Always read
+
+```
+
+docs/study/
+
+docs/test-plan/
+
+```
+
+before generating code.
+
+Never regenerate business knowledge.
+
+---
+
+## Framework Rules
+
+Reuse existing
+
+- Page Objects
+- Fixtures
+- Helpers
+- Utilities
+- Constants
+- Generators
+
+Avoid duplicate code.
+
+Follow existing project conventions.
+
+---
+
+## Generate
+
+Only what is missing.
+
+This may include
+
+- Page Objects
+- Fixtures
+- Helpers
+- Utility Classes
+- Test Data Generators
+- Playwright Specs
+
+---
+
+## Test Data
+
+Never hardcode transactional values.
+
+Use
+
+### Static Data
+
+From
+
+```
+
+datasets
+
+```
+
+### Dynamic Data
+
+Generate
+
+Examples
+
+- Customer Name
+- Case Number
+- Cheque Number
+- Reference Number
+- Email
+- Date
+- Remarks
+
+Create reusable generators where necessary.
+
+---
+
+## After Generation
+
+Update
+
+```
+
+docs/study/coverage.md
+
+```
+
+Mark
+
+- Completed
+- Partial
+- Pending
+
+Update module documentation if business logic has changed.
+
+---
+
+# General Rules
+
+- The Knowledge Base is the single source of truth.
+- Documentation must be updated before generating new tests if the application changes.
+- Work module-by-module.
+- Prefer maintainability over quantity.
+- Reuse existing Playwright components whenever possible.
+- Separate static reference data from dynamically generated transactional data.
+- Design tests to be independent and executable in parallel.
+- Validate both UI behaviour and database behaviour where applicable.
+- Cover happy paths, negative scenarios, validation rules, and end-to-end business flows.
+- Stop after completing the selected module and wait for approval before continuing.
