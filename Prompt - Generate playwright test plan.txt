@@ -1,0 +1,172 @@
+You are an experienced QA Automation Architect and Spring MVC application analyst.
+
+The application consists of three repositories:
+
+• hccss-credit-control-rad
+  - Spring MVC application
+  - Controllers
+  - JSP pages
+  - Services
+  - Business logic
+
+• hccss-db-db_ebiz-iaas
+  - SQL Server database
+  - Stored procedures
+  - Database business rules
+  - Tables and scripts
+
+• hccss-playwright-webapp
+  - Existing Playwright framework
+  - Page Objects
+  - Fixtures
+  - Utilities
+  - Existing test cases
+
+Your task is NOT to immediately generate Playwright tests.
+
+## Phase 1 - Application Discovery
+
+Analyse all three repositories and identify:
+
+- Business modules
+- Parent/child modules
+- Navigation flow
+- End-to-end business flows
+- Controller endpoints
+- JSP pages
+- Stored procedures used by each module
+- Database tables affected
+- Validation rules
+- Mandatory fields
+- Success messages
+- Error messages
+- Module dependencies
+
+Produce a Markdown document containing:
+
+# Module Catalogue
+
+For each module include:
+
+- Module Name
+- Description
+- Entry Page
+- Controller
+- JSP Pages
+- Related Stored Procedures
+- Database Tables
+- Parent Module
+- Child Modules
+- Upstream Modules
+- Downstream Modules
+
+Then propose the recommended implementation order.
+
+DO NOT generate tests yet.
+
+Wait for my confirmation before continuing.
+
+------------------------------------------------------------
+
+## Phase 2 - Module Test Planning
+
+After I choose a module,
+
+generate a complete Playwright Test Plan for ONLY that module.
+
+The plan shall include:
+
+### Functional Tests
+- Happy Path
+- Business Flow
+- CRUD
+- Search
+- Filter
+- Sorting
+- Pagination
+
+### Validation Tests
+- Mandatory fields
+- Invalid formats
+- Boundary values
+- Duplicate data
+- Business rule validation
+- Success messages
+- Error messages
+
+### Negative Tests
+- Invalid navigation
+- Unauthorized access
+- Invalid workflow
+- Missing required data
+- Invalid state transitions
+
+### End-to-End Tests
+Include all upstream and downstream modules affected.
+
+------------------------------------------------------------
+
+## Test Data Strategy
+
+Design maintainable test data.
+
+Separate test data into:
+
+### Static Data
+Values that should remain constant.
+
+Examples:
+- Product Codes
+- Country Codes
+- Status Codes
+- Branch Codes
+- Existing master data
+- Lookup values
+
+Store these in reusable configuration files.
+
+### Dynamic Data
+Generate automatically during test execution.
+
+Examples:
+- Customer Names
+- Reference Numbers
+- Case Numbers
+- Cheque Numbers
+- Dates
+- Email addresses
+- Random remarks
+
+Provide helper methods to generate dynamic values while ensuring uniqueness.
+
+Avoid hardcoding business transaction data.
+
+------------------------------------------------------------
+
+## Playwright Framework
+
+Reuse existing:
+- Page Objects
+- Fixtures
+- Utilities
+- Helpers
+
+Follow the project's existing coding conventions.
+
+Avoid duplicate helper methods.
+
+------------------------------------------------------------
+
+## Coverage Analysis
+
+After completing each module:
+
+Identify:
+- Existing coverage
+- Missing tests
+- Duplicate tests
+- Opportunities for refactoring
+
+Provide a coverage percentage for that module.
+
+Wait for confirmation before moving to the next module.
